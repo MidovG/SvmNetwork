@@ -3,35 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <title>Авторизация и Регистрация</title>
-  <link rel="stylesheet" href="/static/css/lk.css">
+  <link rel="stylesheet" href="../css/lk.css">
 </head>
 <body>
 
   <header>
     <div class="logo">
       <button class="logo_button" id="btn_logo">
-        <img src="/static/img/logo.png" alt="Логотип">
+        <img src="../img/logo.png">
       </button>
+      <script src="../js/goto_main.js"></script>
     </div>
   </header>
 
   <div class="container" id="container">
+
     <div class="form-container sign-up-container">
-      <form method="POST">
+      <form>
         <h2>Регистрация</h2>
-        <input type="text" name="name" placeholder="Имя" required />
-        <input type="email" name="email" placeholder="Email" required />
-        <input type="password" name="password" placeholder="Пароль" required />
-        <button type="submit">Зарегистрироваться</button>
+        <input type="text" placeholder="Имя" required />
+        <input type="email" placeholder="Email" required />
+        <input type="password" placeholder="Пароль" required />
+        <button>Зарегистрироваться</button>
       </form>
     </div>
 
     <div class="form-container sign-in-container">
-      <form method="POST">
+      <form>
         <h2>Авторизация</h2>
-        <input type="email" name="email" placeholder="Email" required />
-        <input type="password" name="password" placeholder="Пароль" required />
-        <button type="submit">Войти</button>
+        <input type="email" placeholder="Email" required />
+        <input type="password" placeholder="Пароль" required />
+        <button>Войти</button>
       </form>
     </div>
 
@@ -43,15 +45,14 @@
           <button class="ghost" id="signIn">Войти</button>
         </div>
         <div class="overlay-panel overlay-right">
-
-        <h2>Привет!</h2>
+          <h2>Привет!</h2>
           <p>Новый пользователь? Зарегистрируйтесь сегодня.</p>
           <button class="ghost" id="signUp">Зарегистрироваться</button>
         </div>
       </div>
     </div>
   </div>
-  <script src="/static/js/animation_lk.js"></script>
+  <script src="../js/animation_lk.js"></script>
 
   <footer>
     <div class="footer_container">
@@ -59,7 +60,7 @@
         <div class="prod_by">prod by midovg</div>
         <div class="my_mail">m@gmail.com</div>
     </div>  
-  </footer>
+</footer>
 
 </body>
 </html>

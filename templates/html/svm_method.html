@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/all_style.css">
+    <link rel="stylesheet" href="../css/svm_method.css">
+    <title>Midover</title>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <button class="logo_button" id="btn_logo">
+                <img src="../img/logo.png">
+            </button>
+            <script src="../js/goto_main.js"></script>
+        </div>
+        <nav class="navigation">
+            <a href="../html/network_traffic.html">Сетевой трафик</a>
+            <a href="../html/anomalies.html">Аномалии трафика</a>
+            <div class="nav_item">
+                <a href="#">SVM</a>
+                <div class="submenu">
+                    <a href="../html/svm_method.html">Метод</a>
+                    <a href="../html/svm_actuality.html">Актуальность</a>
+                    <a href="../html/svm_applicability.html">Применяемость</a>
+                </div>
+            </div>
+            <a href="../html/svm_go.html">Практика</a>
+            <a href="../html/about_us.html">О нас</a>
+        </nav>
+        <div class="lk">
+            <button class="lk_button" id="btn_lk" title="Личный кабинет">
+                <img src="../img/lk_user.png">
+            </button>
+            <script src="../js/goto_lk.js"></script>
+        </div>
+    </header>
+    <main>
+        <div class="svm_method_content">
+            <p>
+                Метод опорных векторов (SVM) — это алгоритм машинного обучения для классификации и регрессии.<br>
+                Основная идея SVM заключается в поиске гиперплоскости, которая максимально разделяет данные разных классов в многомерном пространстве.<br>
+                Краткие особенности метода:<br>
+                1. Граница разделения: SVM стремится найти такую гиперплоскость, которая максимизирует зазор (или "полосу") между классами. Чем шире этот зазор, тем более надёжно модель будет классифицировать новые данные.
+                <br>
+                2. Опорные векторы: Это элементы данных, которые лежат на границе разделения или близко к ней. Они определяют эту границу. Удаление этих точек изменит положение гиперплоскости.
+                <br>
+                3. Ядровые методы: SVM может работать с линейно неразделимыми данными, применяя ядровые методы (например, радиально-базисные функции), которые позволяют проецировать данные в более высокомерное пространство, где они становятся линейно разделимыми.
+            </p>
+        </div>
+        <div class="card_img"></div>
+    </main>
+    <footer>
+        <div class="footer_container">
+            <div class="my_rights">All rights reserved</div>
+            <div class="prod_by">prod by midovg</div>
+            <div class="my_mail">m@gmail.com</div>
+        </div>  
+    </footer>
+</body>
+</html>

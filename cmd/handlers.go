@@ -27,7 +27,7 @@ func RenderStaticFiles(router *mux.Router) {
 }
 
 func HomePage(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, "home_page.html", nil)
+	RenderTemplate(w, "main_page.html", nil)
 }
 
 func Autorization(w http.ResponseWriter, r *http.Request) {

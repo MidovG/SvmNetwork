@@ -120,8 +120,8 @@
   
   button {
     border-radius: 20px;
-    border: 1px solid #0FCBD1;
-    background: #0FCBD1;
+    border: 1px solid #ff4b2b;
+    background: #ff4b2b;
     color: #ffffff;
     font-size: 12px;
     padding: 12px 45px;
@@ -132,7 +132,7 @@
   }
   
   button:hover {
-    background: #0F70D1;
+    background: #ff3a1a;
   }
   
   .overlay-container {
@@ -151,9 +151,9 @@
   }
   
   .overlay {
-    background: #0FCBD1;
-    background: -webkit-linear-gradient(to right, #0FCBD1, #00B4D8); 
-    background: linear-gradient(to right, #0FCBD1, #00B4D8);
+    background: #ff416c;
+    background: -webkit-linear-gradient(to right, #ff4b2b, #ff416c);
+    background: linear-gradient(to right, #ff4b2b, #ff416c);
     color: #ffffff;
     position: relative;
     left: -100%;
@@ -235,25 +235,5 @@ footer {
 .prod_by, .my_rights, .my_mail {
   color: #fff;
   font-size: 11px;
-}
-
-.error_message, .success_message {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  padding: 15px 25px;
-  border-radius: 5px;
-  z-index: 1000;
-  font-size: 16px;
-}
-
-.error_message {
-  background-color: #f8d7da;
-  color: #721c24;
-}
-
-.success_message {
-  background-color: #d4edda;
-  color: #155724;
 }
   

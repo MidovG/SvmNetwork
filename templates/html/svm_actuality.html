@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/all_style.css">
+    <link rel="stylesheet" href="../css/svm_actuality.css">
+    <title>Midover</title>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <button class="logo_button" id="btn_logo">
+                <img src="../img/logo.png">
+            </button>
+            <script src="../js/goto_main.js"></script>
+        </div>
+        <nav class="navigation">
+            <a href="../html/network_traffic.html">Сетевой трафик</a>
+            <a href="../html/anomalies.html">Аномалии трафика</a>
+            <div class="nav_item">
+                <a href="#">SVM</a>
+                <div class="submenu">
+                    <a href="../html/svm_method.html">Метод</a>
+                    <a href="../html/svm_actuality.html">Актуальность</a>
+                    <a href="../html/svm_applicability.html">Применяемость</a>
+                </div>
+            </div>
+            <a href="../html/svm_go.html">Практика</a>
+            <a href="../html/about_us.html">О нас</a>
+        </nav>
+        <div class="lk">
+            <button class="lk_button" id="btn_lk" title="Личный кабинет">
+                <img src="../img/lk_user.png">
+            </button>
+            <script src="../js/goto_lk.js"></script>
+        </div>
+    </header>
+    <main>
+        <div class="card_img_container">
+            <div class="card_img_first"></div>
+            <div class="card_img_second"></div>
+        </div>
+        <div class="svm_actuality_content">
+            <p>
+            Метод опорных векторов (SVM) остаётся актуальным по нескольким причинам:<br>
+
+            1. Эффективность при высоких размерностях:
+            SVM хорошо работает с данными, имеющими большое количество признаков, что часто встречается в текстовой классификации и биоинформатике.<br>
+
+            2. Мощная способность к обобщению:
+            Благодаря максимизации зазора между классами, SVM демонстрирует высокую точность и устойчивость к переобучению, особенно на небольших и средних выборках.<br>
+
+            3. Разнообразие ядерных функций:
+            Возможность использования различных ядер (линейных, полиномиальных, RBF и др.) позволяет адаптировать модель к различным типам данных и задач.<br>
+
+            4. Работа с линейно и нелинейно разделимыми данными:
+            SVM может эффективно разделять как линейно, так и нелинейно разделимые классы благодаря ядровым трюкам.<br>
+
+            5. Интерпретируемость модели:
+            В сравнении с некоторыми другими методами машинного обучения, SVM предоставляет более понятные границы решений, что облегчает интерпретацию результатов.<br>
+
+            6. Оптимизация и теоретическая основа:
+            Метод опорных векторов основан на строгих математических принципах оптимизации, что обеспечивает стабильность и надежность моделей.<br>
+
+            Несмотря на рост популярности нейронных сетей и глубокого обучения, SVM остаётся предпочтительным выбором для многих задач классификации и регрессии, особенно когда требуется высокая точность при ограниченных вычислительных ресурсах и объёмах данных.<br>
+            </p>
+        </div>
+    </main>
+    <footer>
+        <div class="footer_container">
+            <div class="my_rights">All rights reserved</div>
+            <div class="prod_by">prod by midovg</div>
+            <div class="my_mail">m@gmail.com</div>
+        </div>  
+    </footer>
+</body>
+</html>

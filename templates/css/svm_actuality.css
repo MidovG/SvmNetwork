@@ -1,0 +1,68 @@
+main {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+@keyframes slideInRight {
+    0% {
+        transform: translate(100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translate(0);
+        opacity: 1;
+    }
+}
+
+.svm_actuality_content {
+    width: 70%;
+    height: 95%;
+    animation: slideInRight 1s ease-out forwards;
+}
+
+.svm_actuality_content p {
+    position: relative;
+    top:50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 75%;
+    height: 80%;
+    font-size: 25px;
+    color:#fff;
+    text-align: center;
+}
+
+.card_img_container {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-direction: column;
+    width:35%;
+    height:95%;
+    background-color: #000000;
+}
+
+.card_img_first {
+    width: 50%;
+    height: 45%;
+    background-color: #fff;
+    background-image: url(../img/svm_actuality.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 20px;
+    border: 2px solid #0873a1;
+}
+
+.card_img_second {
+    width: 50%;
+    height: 45%;
+    background-color: #fff;
+    background-image: url(../img/svm_actuality_second.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 20px;
+    border: 2px solid #0873a1;
+}
