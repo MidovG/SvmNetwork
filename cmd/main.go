@@ -14,7 +14,7 @@ func main() {
 
 	r.HandleFunc("/", HomePage)
 
-	r.HandleFunc("/autorization", Autorization).Methods("POST")
+	r.HandleFunc("/lk", Autorization).Methods("POST", "GET")
 
 	RenderStaticFiles(r)
 

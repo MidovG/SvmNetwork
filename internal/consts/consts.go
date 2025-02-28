@@ -2,5 +2,5 @@ package consts
 
 const (
 	DbDriverName = "mysql"
-	DbConnStr    = "root:@/network_midover"
+	DbConnStr    = "root:@/svm_network"
 )
