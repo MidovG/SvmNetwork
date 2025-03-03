@@ -1,10 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
+	"log"
 	"net/http"
-	"svm/internal/repo"
 
 	"github.com/gorilla/mux"
 )
@@ -30,10 +29,33 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, "main_page.html", nil)
 }
 
+func NetworkInfo(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, "network_traffic.html", nil)
+}
+
+func AnomaliesInfo(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, "anomalies.html", nil)
+}
+
+func AboutUsPage(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, "about_us.html", nil)
+}
+
+func PracticePage(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, "practice_page.html", nil)
+}
+
+func SignPage(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, "lk.html", nil)
+}
+
+func Personal_Lk(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, "dashboard.html", nil)
+}
+
 func Autorization(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		RenderTemplate(w, "lk.html", nil)
-		return
+		log.Println("Неверный запрос")
 	}
 
 	if err := r.ParseForm(); err != nil {
@@ -44,36 +66,26 @@ func Autorization(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
-	ok, err := gDatabase.CheckUserForLogin(email, password)
+	isExist := gDatabase.CheckExist(email)
 
-	if ok && err == nil {
-		RenderTemplate(w, "dashboard.html", nil)
+	if isExist {
+		isCompare := gDatabase.CheckPassword(email, password)
 
-		id, errOfGetId := gDatabase.GetUserId(email)
-
-		if errOfGetId != nil {
-			fmt.Println(errOfGetId)
+		if isCompare {
+			http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
 		} else {
-			tokenString, errOfCreateJWT := repo.CreateJWTToken(id)
-
-			if errOfCreateJWT != nil {
-				fmt.Println(errOfCreateJWT)
-			} else {
-				errOfCreateSession := gDatabase.CreateSession(id, tokenString)
-
-				if errOfCreateSession != nil {
-					fmt.Println(errOfCreateSession)
-				}
-			}
+			http.Redirect(w, r, "/sign_page", http.StatusBadRequest)
 		}
+
 	} else {
-		RenderTemplate(w, "home_page.html", nil)
+		log.Println("Пользователь с таким email не существует")
 	}
+
 }
 
 func Registration(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		RenderTemplate(w, "lk.html", nil)
+		log.Println("Неверный запрос")
 	}
 
 	if err := r.ParseForm(); err != nil {
@@ -84,11 +96,20 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
-	ok, err := gDatabase.AddNewUser(name, email, password)
-	if ok && err == nil {
-		RenderTemplate(w, "dashboard.html", nil)
+	isExist := gDatabase.CheckExist(email)
+
+	if isExist {
+		log.Println("Пользователь с таким email уже существует")
 	} else {
-		RenderTemplate(w, "home_page.html", nil)
+		errOfAdding := gDatabase.AddNewUser(name, email, password)
+
+		if errOfAdding != nil {
+			log.Println("Произошла ошибка при добавлении пользователя: ", errOfAdding)
+			http.Redirect(w, r, "/sign_page", http.StatusBadRequest)
+		} else {
+			log.Println("Пользователь успешно добавлен!")
+			http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
+		}
 	}
 
 }

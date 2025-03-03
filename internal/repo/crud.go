@@ -1,80 +1,69 @@
 package repo
 
 import (
-	"database/sql"
-	"errors"
-	"fmt"
 	"log"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (d *Database) CheckUserForLogin(email, password string) (ok bool, err error) {
-	var storedHash string
-	err = d.db.QueryRow("SELECT password_hash FROM users WHERE email = ?", email).Scan(&storedHash)
+func (d *Database) AddNewUser(username, email, password string) error {
+	hashedPassword, errOfHashed := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return false, nil
-		}
-		return false, err
+	if errOfHashed != nil {
+		log.Println("Ошибка при хэшировании:", errOfHashed)
+		return errOfHashed
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(password))
+	_, err := d.db.Exec("insert into svm_network.users(name, email, password_hash, created_at, updated_at, is_active) values(?,?,?,?,?,?)", username, email, hashedPassword, time.Now(), time.Now(), true)
+
 	if err != nil {
-		return false, nil
+		log.Println("Ошибка добавления данных пользователя: ", err)
+		return err
 	}
 
-	return true, nil
+	return nil
 }
 
-func (d *Database) GetUserId(email string) (int, error) {
+func (d *Database) CheckPassword(email, password string) bool {
+	var password_hash string
+	err := d.db.QueryRow("select password_hash from svm_network.users where email = ?", email).Scan(&password_hash)
+
+	if err != nil {
+		log.Println("Ошибка: ", err)
+	}
+
+	errOfCheckHash := bcrypt.CompareHashAndPassword([]byte(password_hash), []byte(password))
+
+	if errOfCheckHash != nil {
+		log.Println("Пароли не совпадают: ", errOfCheckHash)
+		return false
+	} else {
+		log.Println("Пароли совпадают")
+		return true
+	}
+}
+
+func (d *Database) GetUserId(email string) (int, bool) {
 	var userId int
-
-	err := d.db.QueryRow("select id from users where email = ?", email).Scan(&userId)
+	err := d.db.QueryRow("select id from svm_network.users where email = ?", email).Scan(&userId)
 
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return 0, fmt.Errorf("пользователь с email %s не найден", email)
-		}
-		return 0, fmt.Errorf("ошибка при получении ID пользователя: %v", err)
+		return 0, false
+	} else {
+		return userId, true
 	}
-
-	return userId, nil
 }
 
-func (d *Database) CheckUserForExist(email string) (ok bool, err error) {
-	var storedHash int
-	err = d.db.QueryRow("SELECT id from users where email = ?", email).Scan(&storedHash)
+func (d *Database) CheckExist(email string) bool {
+	var userId int
+	err := d.db.QueryRow("select id from svm_network.users where email = ?", email).Scan(&userId)
 
 	if err != nil {
-		return true, err
+		return false
+	} else {
+		return true
 	}
-
-	return false, err
-}
-
-func (d *Database) AddNewUser(name, email, password string) (ok bool, err error) {
-	// exists, err := d.CheckUserForExist(email)
-	// if err != nil {
-	// 	return false, err
-	// }
-	// if exists {
-	// 	return false, errors.New("пользователь с таким email уже существует")
-	// }
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return false, err
-	}
-
-	_, err = d.db.Exec("INSERT INTO users (name, email, password_hash, created_at, updated_at, is_active) VALUES (?, ?, ?, ?, ?, ?)", name, email, hashedPassword, time.Now(), time.Now(), true)
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
 }
 
 func (d *Database) CreateSession(userID int, token string) error {
@@ -88,7 +77,7 @@ func (d *Database) CreateSession(userID int, token string) error {
 }
 
 func (d *Database) DeleteUserById() {
-	_, err := d.db.Exec("delete from base_crud_bd.users where id = ?;")
+	_, err := d.db.Exec("delete from svm_network.users where id = ?;")
 	if err != nil {
 		log.Println(err)
 	}
