@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"svm/internal/repo"
 
 	"github.com/gorilla/mux"
 )
@@ -72,6 +73,25 @@ func Autorization(w http.ResponseWriter, r *http.Request) {
 		isCompare := gDatabase.CheckPassword(email, password)
 
 		if isCompare {
+
+			userId := gDatabase.GetUserId(email)
+
+			if userId == 0 {
+				log.Println("Ошибка получения id пользователя")
+			}
+
+			tokenString, errToken := repo.CreateJWTToken(userId)
+
+			if errToken != nil {
+				log.Println("Ошибка формирования сессии: ", errToken)
+			}
+
+			errSession := gDatabase.CreateSession(userId, tokenString)
+
+			if errSession != nil {
+				log.Println("Ошибка формирования сессии: ", errSession)
+			}
+
 			http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
 		} else {
 			http.Redirect(w, r, "/sign_page", http.StatusBadRequest)

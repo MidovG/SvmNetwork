@@ -6,7 +6,7 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-const sessionDuration = time.Hour * 24
+const sessionDuration = time.Hour * 12
 
 func CreateJWTToken(userID int) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -14,7 +14,7 @@ func CreateJWTToken(userID int) (string, error) {
 		"exp":     time.Now().Add(sessionDuration).Unix(),
 	})
 
-	tokenString, err := token.SignedString([]byte("mysecretkey"))
+	tokenString, err := token.SignedString([]byte("usersecretkey"))
 	if err != nil {
 		return "", err
 	}

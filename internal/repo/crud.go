@@ -44,14 +44,14 @@ func (d *Database) CheckPassword(email, password string) bool {
 	}
 }
 
-func (d *Database) GetUserId(email string) (int, bool) {
+func (d *Database) GetUserId(email string) int {
 	var userId int
 	err := d.db.QueryRow("select id from svm_network.users where email = ?", email).Scan(&userId)
 
 	if err != nil {
-		return 0, false
+		return 0
 	} else {
-		return userId, true
+		return userId
 	}
 }
 
@@ -66,9 +66,16 @@ func (d *Database) CheckExist(email string) bool {
 	}
 }
 
-func (d *Database) CreateSession(userID int, token string) error {
-	_, err := d.db.Exec("INSERT INTO user_sessions (user_id, session_token, expires_at, created_at) VALUES (?, ?, ?, ?)",
-		userID, token, time.Now().Add(sessionDuration), time.Now())
+func (d *Database) DeleteUserById() {
+	_, err := d.db.Exec("delete from svm_network.users where id = ?;")
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func (d *Database) CreateSession(userId int, token string) error {
+	_, err := d.db.Exec("INSERT INTO user_sessions (user_id, session_token, expires_at, created_at, remember_session) VALUES (?, ?, ?, ?, ?)",
+		userId, token, time.Now().Add(sessionDuration), time.Now(), true)
 	if err != nil {
 		return err
 	}
@@ -76,9 +83,33 @@ func (d *Database) CreateSession(userID int, token string) error {
 	return nil
 }
 
-func (d *Database) DeleteUserById() {
-	_, err := d.db.Exec("delete from svm_network.users where id = ?;")
+func (d *Database) GetUserToken(userId int) (userToken string) {
+	err := d.db.QueryRow("select session_token from svm_network.user_sessions where user_id = ?", userId).Scan(&userToken)
+
 	if err != nil {
-		log.Println(err)
+		log.Println("Ошибка получения токена: ", err)
 	}
+
+	return
+}
+
+func (d *Database) IsValidToken(userId int) bool {
+	var expiriesTime string
+	err := d.db.QueryRow("select expires_at	from svm_network.user_sessions where user_id = ?", userId).Scan(&expiriesTime)
+
+	if err != nil {
+		log.Println("Ошибка провверки валидности токена: ", err)
+	}
+
+	expDT, errOfParsing := time.Parse("2006-01-02 15:04:05", expiriesTime)
+
+	if errOfParsing != nil {
+		log.Println("Ошибка парсинга времени: ", errOfParsing)
+	}
+
+	if expDT == time.Now() {
+		return false
+	}
+
+	return true
 }
