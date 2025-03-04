@@ -133,3 +133,27 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+func SavePersonalInfo(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		log.Println("Неверный запрос")
+	}
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse from", http.StatusBadRequest)
+	}
+
+	first_name := r.FormValue("first_name")
+	last_name := r.FormValue("last_name")
+	email := r.FormValue("email")
+
+	errOfAddingPersonalInfo := gDatabase.AddPersonalInfo(first_name, last_name, email, 2)
+
+	if errOfAddingPersonalInfo != nil {
+		log.Println("Произошла ошибка при добавлении персональных данных пользователя: ", errOfAddingPersonalInfo)
+	}
+
+	log.Println("Персональные данные пользователя успешно добавлены!")
+	http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
+
+}

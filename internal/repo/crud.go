@@ -18,7 +18,6 @@ func (d *Database) AddNewUser(username, email, password string) error {
 	_, err := d.db.Exec("insert into svm_network.users(name, email, password_hash, created_at, updated_at, is_active) values(?,?,?,?,?,?)", username, email, hashedPassword, time.Now(), time.Now(), true)
 
 	if err != nil {
-		log.Println("Ошибка добавления данных пользователя: ", err)
 		return err
 	}
 
@@ -71,6 +70,16 @@ func (d *Database) DeleteUserById() {
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+func (d *Database) AddPersonalInfo(first_name, last_name, email string, userId int) error {
+	_, err := d.db.Exec("insert into svm_network.user_profiles(user_id, first_name, last_name) values(?,?,?)", userId, first_name, last_name)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (d *Database) CreateSession(userId int, token string) error {

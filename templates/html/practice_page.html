@@ -6,276 +6,7 @@
     <title>Midover</title>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&family=Fraunces:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            /* Тёмная тема */
-            --primary: #0f1a2f;
-            --secondary: #1e293b;
-            --accent: #64ffda;
-            --light: #e5e7eb;
-            --surface: #252f40;
-            
-            /* Светлая тема */
-            --light-primary: #ebedf0;
-            --light-secondary: #f8fafc;
-            --light-accent: #00e5d6;
-            --light-surface: #ffffff;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'IBM Plex Sans', sans-serif;
-        }
-
-        body {
-            min-height: 100vh;
-            transition: all 0.3s ease;
-            color: var(--light);
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-        }
-
-        .container {
-            max-width: 1440px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Темы */
-        body.light-theme {
-            background: linear-gradient(135deg, var(--light-primary) 0%, var(--light-secondary) 100%);
-            --primary: var(--light-primary);
-            --secondary: var(--light-secondary);
-            --accent: var(--light-accent);
-            --surface: var(--light-surface);
-            color: #1a202c;
-        }
-
-        /* Меню */
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: var(--surface);
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-
-        .menu-toggle {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 48px;
-            height: 48px;
-        }
-
-        .theme-toggle {
-            margin-left: auto;
-            background: var(--accent);
-            border: none;
-            padding: 10px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 48px;
-            height: 48px;
-        }
-
-        /* Боковое меню */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: -280px;
-            width: 280px;
-            height: 100%;
-            background: var(--surface);
-            padding: 40px 20px;
-            transition: transform 0.3s ease;
-            box-shadow: 0 0 30px rgba(0,0,0,0.15);
-        }
-
-        .sidebar.active {
-            left: 0;
-        }
-
-        /* Метрики */
-        .metric-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin: 120px 0 80px;
-        }
-
-        .metric-card {
-            background: var(--secondary);
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-            transition: transform 0.3s;
-        }
-
-        .metric-value {
-            font-size: 3rem;
-            color: var(--accent);
-        }
-
-        /* Графики */
-        .chart-container {
-            border: 2px solid var(--accent);
-            border-radius: 16px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-
-        /* Загрузочная секция */
-        .dropzone-section {
-            min-height: 400px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin: 120px 0;
-            transition: all 0.4s;
-        }
-
-        .dropzone {
-            border: 4px dashed var(--accent);
-            border-radius: 24px;
-            padding: 60px;
-            text-align: center;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .dropzone:hover {
-            border-color: rgba(100, 255, 218, 0.7);
-        }
-
-        .dropzone::before {
-            content: '';
-            position: absolute;
-            top: -10%;
-            left: -10%;
-            right: -10%;
-            bottom: -10%;
-            background: linear-gradient(45deg, transparent, var(--accent), transparent);
-            opacity: 0.2;
-            border-radius: 30px;
-            animation: shine 2s infinite;
-        }
-
-        @keyframes shine {
-            0% { transform: rotate(0deg) scale(0.5); }
-            100% { transform: rotate(360deg) scale(1.5); }
-        }
-
-        .dropzone p {
-            margin-bottom: 30px;
-            font-size: 1.5rem;
-        }
-
-        .analyze-btn {
-            background: var(--accent);
-            color: white;
-            padding: 15px 40px;
-            border-radius: 24px;
-            font-size: 1.2rem;
-            transition: transform 0.3s;
-            margin-top: 30px;
-            cursor: pointer;
-            transform: scale(1.1);
-        }
-
-        /* Результаты анализа */
-        .analysis-results {
-            display: none;
-            padding: 60px 0;
-        }
-
-        .result-card {
-            background: var(--secondary);
-            border-radius: 24px;
-            padding: 30px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-            margin: 20px 0;
-        }
-
-        .result-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 30px 0;
-        }
-
-        .result-table th,
-        .result-table td {
-            padding: 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .anomaly-badge {
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 24px;
-            font-weight: 600;
-        }
-
-        .status-normal {
-            background: linear-gradient(45deg, #2ecc71, #27ae60);
-        }
-
-        .status-anomaly {
-            background: linear-gradient(45deg, #e74c3c, #c0392b);
-        }
-
-        /* Анимация загрузки */
-        .loading-indicator {
-            border: 8px solid var(--accent);
-            border-radius: 50%;
-            border-top: 8px solid rgba(100, 255, 218, 0.3);
-            width: 80px;
-            height: 80px;
-            animation: spin 2s linear infinite;
-            margin: 30px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Футер */
-        footer {
-            background: var(--surface);
-            padding: 20px;
-            text-align: center;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
-        }
-
-        /* Адаптивность */
-        @media (max-width: 768px) {
-            .metric-section {
-                grid-template-columns: 1fr;
-            }
-            .dropzone {
-                padding: 40px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="/static/css/practice_page.css">
 </head>
 <body>
     <!-- Меню -->
@@ -290,10 +21,10 @@
     <!-- Боковое меню -->
     <nav class="sidebar" id="sidebar">
         <ul>
-            <li><a href="#metrics">Метрики</a></li>
-            <li><a href="#graphs">Графики</a></li>
-            <li><a href="#analysis">Анализ</a></li>
-            <li><a href="#history">История</a></li>
+            <li><a href="/network">Сетевой трафик</a></li>
+            <li><a href="/anomalies">Аномалии</a></li>
+            <li><a href="/personal_lk">Личный кабинет</a></li>
+            <li><a href="/about_us">О нас</a></li>
         </ul>
     </nav>
 
@@ -314,16 +45,6 @@
             </div>
         </section>
 
-        <!-- Графики -->
-        <section id="graphs">
-            <div class="chart-container">
-                <div class="chart-placeholder">Confusion Matrix</div>
-            </div>
-            <div class="chart-container">
-                <div class="chart-placeholder">ROC-кривая</div>
-            </div>
-        </section>
-
         <!-- Секция анализа -->
         <section id="analysis">
             <div class="dropzone-section" id="uploadSection">
@@ -337,6 +58,16 @@
 
             <!-- Результаты анализа -->
             <div class="analysis-results" id="resultsSection">
+                <!-- Графики -->
+                <section id="graphs">
+                    <div class="chart-container">
+                        <div class="chart-placeholder">Confusion Matrix</div>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-placeholder">ROC-кривая</div>
+                    </div>
+                </section>
+
                 <div class="result-card">
                     <h2>Результаты анализа</h2>
                     <div class="loading-indicator" id="loading"></div>
@@ -369,6 +100,7 @@
 
     <footer>
         <p>© 2025 Midover</p>
+        <script src="/static/js/scroll_footer.js"></script>
     </footer>
 
     <script>

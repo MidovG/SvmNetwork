@@ -1,0 +1,326 @@
+:root {
+    /* Тёмная тема */
+    --primary: #0f1a2f;
+    --secondary: #1e293b;
+    --accent: #64ffda;
+    --light: #e5e7eb;
+    --surface: #252f40;
+    
+    /* Светлая тема */
+    --light-primary: #ebedf0;
+    --light-secondary: #f8fafc;
+    --light-accent: #00e5d6;
+    --light-surface: #ffffff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'IBM Plex Sans', sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    transition: all 0.3s ease;
+    color: var(--light);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+}
+
+.container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Темы */
+body.light-theme {
+    background: linear-gradient(135deg, var(--light-primary) 0%, var(--light-secondary) 100%);
+    --primary: var(--light-primary);
+    --secondary: var(--light-secondary);
+    --accent: var(--light-accent);
+    --surface: var(--light-surface);
+    color: #1a202c;
+}
+
+/* Меню */
+header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: var(--surface);
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.menu-toggle {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+}
+
+.theme-toggle {
+    margin-left: auto;
+    background: var(--accent);
+    border: none;
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+}
+
+/* Боковое меню */
+.sidebar {
+    position: fixed;
+    top: 0; /* Оставляем top: 0, но добавим padding-top */
+    left: -280px;
+    width: 245px;
+    height: 100%;
+    background: var(--surface);
+    padding: 90px 20px 20px; /* Добавляем padding-top: 90px (высота header + отступ) */
+    transition: transform 0.3s ease;
+    box-shadow: 0 0 30px rgba(0,0,0,0.15);
+}
+
+.sidebar.active {
+    left: 0;
+}
+
+/* Центрирование ссылок вертикально */
+nav.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex; /* Используем Flexbox для центрирования */
+    flex-direction: column; /* Вертикальное расположение элементов */
+    justify-content: center; /* Центрируем содержимое по высоте */
+    align-items: flex-start; /* Выравниваем текст по левому краю */
+    height: calc(100% - 90px); /* Вычитаем padding-top */
+}
+
+/* Стиль для элементов списка */
+nav.sidebar ul li {
+    margin-bottom: 5px; /* Отступ между пунктами */
+}
+
+/* Стиль для ссылок */
+nav.sidebar ul li a {
+    display: block; /* Сделать ссылку блочной */
+    text-decoration: none; /* Убрать подчеркивание */
+    color: white; /* Белый текст */
+    background-color: #444; /* Фон ссылки */
+    padding: 10px 15px; /* Внутренние отступы */
+    border-radius: 5px; /* Закругленные углы */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Анимация перехода */
+    font-size: 16px; /* Размер шрифта */
+    font-weight: 500; /* Полужирный шрифт */
+    position: relative; /* Для создания эффекта активности */
+}
+
+/* Hover эффект для ссылок */
+nav.sidebar ul li a:hover {
+    background-color: #40ba9d; /* Голубой цвет при наведении */
+    color: white; /* Белый текст */
+    transform: scale(1.05); /* Немного увеличиваем размер */
+}
+
+/* Активная ссылка (например, текущая страница) */
+nav.sidebar ul li a.active {
+    background-color: #4ad7b6; /* Другой цвет для активной ссылки */
+    font-weight: bold; /* Жирный шрифт */
+}
+
+/* Эффект подсветки активной ссылки */
+nav.sidebar ul li a.active::before {
+    content: ""; /* Создаем псевдоэлемент */
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 5px; /* Ширина подсветки */
+    height: 100%; /* Высота равна высоте ссылки */
+    background-color: #ff9f00; /* Оранжевая подсветка */
+    border-radius: 5px 0 0 5px; /* Закругленные углы */
+}
+
+/* Метрики */
+.metric-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 120px 0 80px;
+}
+
+.metric-card {
+    background: var(--secondary);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    transition: transform 0.3s;
+}
+
+.metric-value {
+    font-size: 3rem;
+    color: var(--accent);
+}
+
+/* Графики */
+.chart-container {
+    border: 2px solid var(--accent);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+/* Загрузочная секция */
+.dropzone-section {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 120px 0;
+    transition: all 0.4s;
+}
+
+.dropzone {
+    border: 4px dashed var(--accent);
+    border-radius: 24px;
+    padding: 60px;
+    text-align: center;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.dropzone:hover {
+    border-color: rgba(100, 255, 218, 0.7);
+}
+
+.dropzone::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    right: -10%;
+    bottom: -10%;
+    background: linear-gradient(45deg, transparent, var(--accent), transparent);
+    opacity: 0.2;
+    border-radius: 30px;
+    animation: shine 2s infinite;
+}
+
+@keyframes shine {
+    0% { transform: rotate(0deg) scale(0.5); }
+    100% { transform: rotate(360deg) scale(1.5); }
+}
+
+.dropzone p {
+    margin-bottom: 30px;
+    font-size: 1.5rem;
+}
+
+.analyze-btn {
+    background: var(--accent);
+    color: white;
+    padding: 15px 40px;
+    border-radius: 24px;
+    font-size: 1.2rem;
+    transition: transform 0.3s;
+    margin-top: 30px;
+    cursor: pointer;
+    transform: scale(1.1);
+}
+
+/* Результаты анализа */
+.analysis-results {
+    display: none;
+    padding: 60px 0;
+}
+
+.result-card {
+    background: var(--secondary);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    margin: 20px 0;
+}
+
+.result-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 30px 0;
+}
+
+.result-table th,
+.result-table td {
+    padding: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.anomaly-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 24px;
+    font-weight: 600;
+}
+
+.status-normal {
+    background: linear-gradient(45deg, #2ecc71, #27ae60);
+}
+
+.status-anomaly {
+    background: linear-gradient(45deg, #e74c3c, #c0392b);
+}
+
+/* Анимация загрузки */
+.loading-indicator {
+    border: 8px solid var(--accent);
+    border-radius: 50%;
+    border-top: 8px solid rgba(100, 255, 218, 0.3);
+    width: 80px;
+    height: 80px;
+    animation: spin 2s linear infinite;
+    margin: 30px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Футер */
+footer {
+    background: var(--surface);
+    padding: 20px;
+    text-align: center;
+    width: 100%;
+    position: relative; /* Чтобы footer не был fixed */
+    opacity: 0; /* Скрыть footer изначально */
+    transform: translateY(50px); /* Сдвинуть footer вниз */
+    transition: opacity 0.3s ease, transform 0.3s ease; /* Добавить плавную анимацию */
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .metric-section {
+        grid-template-columns: 1fr;
+    }
+    .dropzone {
+        padding: 40px;
+    }
+}
