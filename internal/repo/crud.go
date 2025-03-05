@@ -73,10 +73,16 @@ func (d *Database) DeleteUserById() {
 }
 
 func (d *Database) AddPersonalInfo(first_name, last_name, email string, userId int) error {
-	_, err := d.db.Exec("insert into svm_network.user_profiles(user_id, first_name, last_name) values(?,?,?)", userId, first_name, last_name)
+	_, errProfiles := d.db.Exec("insert into svm_network.user_profiles(user_id, first_name, last_name) values(?,?,?)", userId, first_name, last_name)
 
-	if err != nil {
-		return err
+	if errProfiles != nil {
+		return errProfiles
+	}
+
+	_, errEmail := d.db.Exec("update svm_network.users set email = ? where id = ?", email, userId)
+
+	if errEmail != nil {
+		return errEmail
 	}
 
 	return nil
