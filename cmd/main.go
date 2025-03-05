@@ -22,15 +22,10 @@ func main() {
 
 	// personal info
 	r.HandleFunc("/personal_lk", Personal_Lk).Methods("POST", "GET")
-	r.HandleFunc("/save_dat", SavePersonalInfo).Methods("POST", "GET")
+	r.HandleFunc("/exit", ExitFromLk).Methods("POST", "GET")
 
 	// info pages
-	r.HandleFunc("/anomalies", AnomaliesInfo).Methods("POST", "GET")
-	r.HandleFunc("/network", NetworkInfo).Methods("POST", "GET")
 	r.HandleFunc("/about_us", AboutUsPage).Methods("POST", "GET")
-
-	// practice
-	r.HandleFunc("/practice", PracticePage).Methods("POST", "GET")
 
 	RenderStaticFiles(r)
 

@@ -4,7 +4,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"svm/internal/repo"
+	"svm/internal/entity/userModel"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -27,23 +28,11 @@ func RenderStaticFiles(router *mux.Router) {
 }
 
 func HomePage(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, "main_page.html", nil)
-}
-
-func NetworkInfo(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, "network_traffic.html", nil)
-}
-
-func AnomaliesInfo(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, "anomalies.html", nil)
+	RenderTemplate(w, "practice_page.html", nil)
 }
 
 func AboutUsPage(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, "about_us.html", nil)
-}
-
-func PracticePage(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, "practice_page.html", nil)
 }
 
 func SignPage(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +40,12 @@ func SignPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func Personal_Lk(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, "dashboard.html", nil)
+	if userModel.IsValidToken(w, r) {
+		RenderTemplate(w, "dashboard.html", nil)
+	} else {
+		http.Redirect(w, r, "/sign_page", http.StatusSeeOther)
+	}
+
 }
 
 func Autorization(w http.ResponseWriter, r *http.Request) {
@@ -80,18 +74,21 @@ func Autorization(w http.ResponseWriter, r *http.Request) {
 				log.Println("Ошибка получения id пользователя")
 			}
 
-			tokenString, errToken := repo.CreateJWTToken(userId)
+			// errSession := gDatabase.CreateSession(userId, tokenString)
 
-			if errToken != nil {
-				log.Println("Ошибка формирования сессии: ", errToken)
+			// if errSession != nil {
+			// 	log.Println("Ошибка формирования сессии: ", errSession)
+			// }
+
+			tokenString, errToken := userModel.CreateJWTToken(userId)
+
+			if errToken != nil && tokenString != "" {
+				log.Println("Ошибка формирования токена: ", errToken)
 			}
 
-			errSession := gDatabase.CreateSession(userId, tokenString)
+			userModel.SetUserCookie(w, r, tokenString)
 
-			if errSession != nil {
-				log.Println("Ошибка формирования сессии: ", errSession)
-			}
-
+			time.Sleep(100 * time.Millisecond)
 			http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
 		} else {
 			http.Redirect(w, r, "/sign_page", http.StatusBadRequest)
@@ -134,26 +131,31 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func SavePersonalInfo(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		log.Println("Неверный запрос")
-	}
+// func SavePersonalInfo(w http.ResponseWriter, r *http.Request) {
+// 	if r.Method != "POST" {
+// 		log.Println("Неверный запрос")
+// 	}
 
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Failed to parse from", http.StatusBadRequest)
-	}
+// 	if err := r.ParseForm(); err != nil {
+// 		http.Error(w, "Failed to parse from", http.StatusBadRequest)
+// 	}
 
-	first_name := r.FormValue("first_name")
-	last_name := r.FormValue("last_name")
-	email := r.FormValue("email")
+// 	first_name := r.FormValue("first_name")
+// 	last_name := r.FormValue("last_name")
+// 	email := r.FormValue("email")
 
-	errOfAddingPersonalInfo := gDatabase.AddPersonalInfo(first_name, last_name, email, 2)
+// 	errOfAddingPersonalInfo := gDatabase.AddPersonalInfo(first_name, last_name, email, 2)
 
-	if errOfAddingPersonalInfo != nil {
-		log.Println("Произошла ошибка при добавлении персональных данных пользователя: ", errOfAddingPersonalInfo)
-	}
+// 	if errOfAddingPersonalInfo != nil {
+// 		log.Println("Произошла ошибка при добавлении персональных данных пользователя: ", errOfAddingPersonalInfo)
+// 	}
 
-	log.Println("Персональные данные пользователя успешно добавлены!")
-	http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
+// 	log.Println("Персональные данные пользователя успешно добавлены!")
+// 	http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
+// }
 
+func ExitFromLk(w http.ResponseWriter, r *http.Request) {
+	userModel.ResetUserCookie(w)
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="/static/css/practice_page.css">
 </head>
 <body>
-    <!-- Меню -->
     <header>
         <button class="menu-toggle" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
         <h1 class="logo" style="color: white; margin-left: 20px; font-family: 'Fraunces', serif; font-size: 2.5rem;">Midover</h1>
@@ -18,18 +17,14 @@
         </button>
     </header>
 
-    <!-- Боковое меню -->
     <nav class="sidebar" id="sidebar">
         <ul>
-            <li><a href="/network">Сетевой трафик</a></li>
-            <li><a href="/anomalies">Аномалии</a></li>
             <li><a href="/personal_lk">Личный кабинет</a></li>
             <li><a href="/about_us">О нас</a></li>
         </ul>
     </nav>
 
     <div class="container">
-        <!-- Метрики -->
         <section id="metrics" class="metric-section">
             <div class="metric-card">
                 <div class="metric-value">98.5%</div>
@@ -42,6 +37,30 @@
             <div class="metric-card">
                 <div class="metric-value">0.99</div>
                 <div class="metric-label">AUC-ROC</div>
+            </div>
+        </section>
+
+        <section id="network" class="network-section">
+            <div class="network-card">
+                <div class="network-value">Cетевой трафик</div>
+                <div class="network-label">
+                    Сетевой трафик — это поток данных, передаваемых между устройствами в компьютерной сети. Он представляет собой совокупность всех пакетов информации, которые перемещаются через сеть для обеспечения связи между различными узлами (например, компьютерами, серверами, роутерами и другими устройствами). Качество и характеристики сетевого трафика могут значительно влиять на производительность сети и её способность удовлетворять потребности пользователей.
+                </div>
+            </div>
+        </section>
+
+        <section id="image-section" class="image-section">
+            <div class="image-card">
+                <img src="/static/img/anomalies.png">
+            </div>
+        </section>
+
+        <section id="anomalies" class="anomalies-section">
+            <div class="anomalies-card">
+                <div class="anomalies-value">Аномалии</div>
+                <div class="anomalies-label">
+                    Аномалии сетевого трафика — это необычные или подозрительные паттерны передачи данных в компьютерной сети, которые отклоняются от нормального или ожидаемого поведения. Такие аномалии могут указывать на различные проблемы, такие как кибератаки, сбои оборудования, ошибки конфигурации или другие неполадки.
+                </div>
             </div>
         </section>
 
