@@ -40,8 +40,16 @@ func SignPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func Personal_Lk(w http.ResponseWriter, r *http.Request) {
-	if userModel.IsValidToken(w, r) {
-		RenderTemplate(w, "dashboard.html", nil)
+	if userModel.IsValidToken(r) {
+		userId := userModel.GetIdFromJWT(r)
+
+		if userId == 0 {
+			http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
+			return
+		}
+
+		userProfiles := gDatabase.LoadPersonalInfo(userId)
+		RenderTemplate(w, "dashboard.html", userProfiles)
 	} else {
 		http.Redirect(w, r, "/sign_page", http.StatusSeeOther)
 	}
@@ -73,12 +81,6 @@ func Autorization(w http.ResponseWriter, r *http.Request) {
 			if userId == 0 {
 				log.Println("Ошибка получения id пользователя")
 			}
-
-			// errSession := gDatabase.CreateSession(userId, tokenString)
-
-			// if errSession != nil {
-			// 	log.Println("Ошибка формирования сессии: ", errSession)
-			// }
 
 			tokenString, errToken := userModel.CreateJWTToken(userId)
 
@@ -131,28 +133,36 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// func SavePersonalInfo(w http.ResponseWriter, r *http.Request) {
-// 	if r.Method != "POST" {
-// 		log.Println("Неверный запрос")
-// 	}
+func SavePersonalInfo(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		log.Println("Неверный запрос")
+	}
 
-// 	if err := r.ParseForm(); err != nil {
-// 		http.Error(w, "Failed to parse from", http.StatusBadRequest)
-// 	}
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse from", http.StatusBadRequest)
+	}
 
-// 	first_name := r.FormValue("first_name")
-// 	last_name := r.FormValue("last_name")
-// 	email := r.FormValue("email")
+	first_name := r.FormValue("first_name")
+	last_name := r.FormValue("last_name")
+	//email := r.FormValue("email")
 
-// 	errOfAddingPersonalInfo := gDatabase.AddPersonalInfo(first_name, last_name, email, 2)
+	userId := userModel.GetIdFromJWT(r)
 
-// 	if errOfAddingPersonalInfo != nil {
-// 		log.Println("Произошла ошибка при добавлении персональных данных пользователя: ", errOfAddingPersonalInfo)
-// 	}
+	if userId == 0 {
+		http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
+		return
+	}
 
-// 	log.Println("Персональные данные пользователя успешно добавлены!")
-// 	http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
-// }
+	errOfSavingPersonalInfo := gDatabase.UpdatePersonalInfo(first_name, last_name, userId)
+
+	if errOfSavingPersonalInfo != nil {
+		log.Println("Произошла ошибка при сохранении персональных данных пользователя: ", errOfSavingPersonalInfo)
+		http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
+	}
+
+	log.Println("Персональные данные пользователя успешно сохранены!")
+	http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
+}
 
 func ExitFromLk(w http.ResponseWriter, r *http.Request) {
 	userModel.ResetUserCookie(w)

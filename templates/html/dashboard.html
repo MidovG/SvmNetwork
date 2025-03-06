@@ -20,16 +20,20 @@
     <div class="profile-header">
         <h1>Личный кабинет</h1>
     </div>
-    <form class="profile-form" method="POST" action="/exit">
+    <form class="profile-form" method="POST" action="/save_dat">
         <label for="first_name">Имя:</label>
-        <input type="text" id="first_name" name="first_name">
+        <input type="text" id="first_name" name="first_name" value="{{ .First_Name }}">
 
         <label for="last_name">Фамилия:</label>
-        <input type="text" id="last_name" name="last_name">
+        <input type="text" id="last_name" name="last_name" value="{{ .Last_Name }}">
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email">
+        <!-- <label for="email">Email:</label>
+        <input type="email" id="email" name="email"> -->
 
+        <button type="submit" class="save">Сохранить изменения</button>
+    </form>
+
+    <form method="POST" action="/exit">
         <button type="submit" class="exit">Выйти</button>
     </form>
 </div>

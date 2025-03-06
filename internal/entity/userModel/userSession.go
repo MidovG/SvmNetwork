@@ -24,7 +24,7 @@ func CreateJWTToken(userID int) (string, error) {
 	return tokenString, nil
 }
 
-func IsValidToken(w http.ResponseWriter, r *http.Request) bool {
+func IsValidToken(r *http.Request) bool {
 	cookie, err := r.Cookie("token")
 
 	if err != nil {
@@ -52,6 +52,36 @@ func IsValidToken(w http.ResponseWriter, r *http.Request) bool {
 	log.Println("Токен действителен")
 
 	return true
+}
+
+func GetIdFromJWT(r *http.Request) int {
+	cookie, err := r.Cookie("token")
+
+	if err != nil {
+		log.Println("Ошибка получения куков")
+	}
+
+	tokenString := cookie.Value
+
+	token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
+	if err != nil {
+		log.Println(err)
+		return 0
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		log.Println("Invalid claims")
+		return 0
+	}
+
+	id, ok := claims["user_id"].(float64)
+	if !ok {
+		log.Println("Invalid or missing 'id' claim")
+		return 0
+	}
+
+	return int(id)
 }
 
 func SetUserCookie(w http.ResponseWriter, r *http.Request, token string) {

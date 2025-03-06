@@ -6,18 +6,16 @@ import (
 
 // User - модель пользователя
 type User struct {
-	ID        int       `db:"id"`
-	Username  string    `db:"username"`
-	Email     string    `db:"email"`
-	Password  string    `db:"password_hash"`
-	CreatedAt time.Time `db:"created_at"`
+	ID        int
+	Username  string
+	Email     string
+	Password  string
+	CreatedAt time.Time
 }
 
-// Session - модель сессии
-type Session struct {
-	ID           int       `db:"id"`
-	UserID       int       `db:"user_id"`
-	SessionToken string    `db:"session_token"`
-	ExpiresAt    time.Time `db:"expires_at"`
-	CreatedAt    time.Time `db:"created_at"`
+// UserProfile - модель данных профиля пользователя
+type UserProfile struct {
+	User_Id    int
+	First_Name string
+	Last_Name  string
 }

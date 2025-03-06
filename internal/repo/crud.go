@@ -2,6 +2,7 @@ package repo
 
 import (
 	"log"
+	"svm/internal/entity/userModel"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -65,66 +66,48 @@ func (d *Database) CheckExist(email string) bool {
 	}
 }
 
-func (d *Database) DeleteUserById() {
-	_, err := d.db.Exec("delete from svm_network.users where id = ?;")
-	if err != nil {
-		log.Println(err)
+func (d *Database) DeleteUserById(userId int) error {
+	_, errOfDel := d.db.Exec("delete from svm_network.users where id = ?", userId)
+
+	if errOfDel != nil {
+		log.Println(errOfDel)
+		return errOfDel
 	}
+
+	return nil
 }
 
 func (d *Database) AddPersonalInfo(first_name, last_name, email string, userId int) error {
 	_, errProfiles := d.db.Exec("insert into svm_network.user_profiles(user_id, first_name, last_name) values(?,?,?)", userId, first_name, last_name)
 
 	if errProfiles != nil {
+		log.Println(errProfiles)
 		return errProfiles
-	}
-
-	_, errEmail := d.db.Exec("update svm_network.users set email = ? where id = ?", email, userId)
-
-	if errEmail != nil {
-		return errEmail
 	}
 
 	return nil
 }
 
-// func (d *Database) CreateSession(userId int, token string) error {
-// 	_, err := d.db.Exec("INSERT INTO user_sessions (user_id, session_token, expires_at, created_at, remember_session) VALUES (?, ?, ?, ?, ?)",
-// 		userId, token, time.Now().Add(sessionDuration), time.Now(), true)
-// 	if err != nil {
-// 		return err
-// 	}
+func (d *Database) UpdatePersonalInfo(first_name, last_name string, userId int) error {
+	_, errOfUpdating := d.db.Exec("update svm_network.user_profiles set first_name = ?, last_name = ? where user_id = ?", first_name, last_name, userId)
 
-// 	return nil
-// }
+	if errOfUpdating != nil {
+		log.Println(errOfUpdating)
+		return errOfUpdating
+	}
 
-// func (d *Database) GetUserToken(userId int) (userToken string) {
-// 	err := d.db.QueryRow("select session_token from svm_network.user_sessions where user_id = ?", userId).Scan(&userToken)
+	return nil
+}
 
-// 	if err != nil {
-// 		log.Println("Ошибка получения токена: ", err)
-// 	}
+func (d *Database) LoadPersonalInfo(userId int) userModel.UserProfile {
+	var userProfile userModel.UserProfile
+	userProfile.User_Id = userId
 
-// 	return
-// }
+	errOfLoading := d.db.QueryRow("select first_name, last_name from svm_network.user_profiles where user_id = ?", userId).Scan(&userProfile.First_Name, &userProfile.Last_Name)
 
-// func (d *Database) IsValidToken(userId int) bool {
-// 	var expiriesTime string
-// 	err := d.db.QueryRow("select expires_at	from svm_network.user_sessions where user_id = ?", userId).Scan(&expiriesTime)
+	if errOfLoading != nil {
+		log.Println(errOfLoading)
+	}
 
-// 	if err != nil {
-// 		log.Println("Ошибка провверки валидности токена: ", err)
-// 	}
-
-// 	expDT, errOfParsing := time.Parse("2006-01-02 15:04:05", expiriesTime)
-
-// 	if errOfParsing != nil {
-// 		log.Println("Ошибка парсинга времени: ", errOfParsing)
-// 	}
-
-// 	if expDT == time.Now() {
-// 		return false
-// 	}
-
-// 	return true
-// }
+	return userProfile
+}
