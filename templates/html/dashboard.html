@@ -10,7 +10,7 @@
 <header>
     <div class="logo">
         <button class="logo_button" id="btn_logo">
-        <img src="/static/img/logo.png">
+            <img src="/static/img/logo.png">
         </button>
         <script src="/static/js/goto_main.js"></script>
     </div>
@@ -27,16 +27,25 @@
         <label for="last_name">Фамилия:</label>
         <input type="text" id="last_name" name="last_name" value="{{ .Last_Name }}">
 
-        <!-- <label for="email">Email:</label>
-        <input type="email" id="email" name="email"> -->
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" value="{{ .Email }}">
 
-        <button type="submit" class="save">Сохранить изменения</button>
+        <div class="button-container">
+            <button type="submit" class="save">Сохранить изменения</button>
+        </div>
+    </form>
+
+    <form method="POST" action="/user_password">
+        <div class="button-container">
+            <button type="submit" class="save">Обновить пароль</button>
+        </div>
     </form>
 
     <form method="POST" action="/exit">
-        <button type="submit" class="exit">Выйти</button>
+        <div class="button-container">
+            <button type="submit" class="exit">Выйти</button>
+        </div>
     </form>
 </div>
-
 </body>
 </html>

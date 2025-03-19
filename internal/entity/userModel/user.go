@@ -18,4 +18,5 @@ type UserProfile struct {
 	User_Id    int
 	First_Name string
 	Last_Name  string
+	Email      string
 }

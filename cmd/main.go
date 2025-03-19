@@ -23,6 +23,8 @@ func main() {
 	// personal info
 	r.HandleFunc("/personal_lk", Personal_Lk).Methods("POST", "GET")
 	r.HandleFunc("/save_dat", SavePersonalInfo).Methods("POST", "GET")
+	r.HandleFunc("/user_password", PasswordPage).Methods("POST", "GET")
+	r.HandleFunc("/update_password", UpdatePassword).Methods("POST", "GET")
 	r.HandleFunc("/exit", ExitFromLk).Methods("POST", "GET")
 
 	// info pages

@@ -93,7 +93,7 @@ header {
     height: 100%;
     background: var(--surface);
     padding: 90px 20px 20px; /* Добавляем padding-top: 90px (высота header + отступ) */
-    transition: transform 0.3s ease;
+    transition: all 1s;
     box-shadow: 0 0 30px rgba(0,0,0,0.15);
 }
 

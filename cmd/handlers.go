@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func RenderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
@@ -53,6 +54,65 @@ func Personal_Lk(w http.ResponseWriter, r *http.Request) {
 	} else {
 		http.Redirect(w, r, "/sign_page", http.StatusSeeOther)
 	}
+
+}
+
+func PasswordPage(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, "password_page.html", nil)
+}
+
+func UpdatePassword(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		log.Println("Неверный запрос")
+	}
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
+	}
+
+	oldPassword := r.FormValue("old-password")
+	newPassword := r.FormValue("new-passsword")
+	//confirmPassword := r.FormValue("confirm-password")
+
+	userId := userModel.GetIdFromJWT(r)
+
+	if userId == 0 {
+		http.Redirect(w, r, "/user_password", http.StatusBadRequest)
+		return
+	}
+
+	truePassword := gDatabase.CheckPasswordById(userId, oldPassword)
+
+	if !truePassword {
+		log.Println("Старые пароли не совпадают")
+		http.Redirect(w, r, "/user_password", http.StatusBadRequest)
+		return
+	}
+
+	// if newPassword != confirmPassword {
+	// 	log.Println("Новые пароли не совпадают")
+	// 	http.Redirect(w, r, "/user_password", http.StatusBadRequest)
+	// 	return
+	// }
+
+	hashedPassword, errOfHashed := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+
+	if errOfHashed != nil {
+		log.Println("Ошибка при хешировании", errOfHashed)
+		http.Redirect(w, r, "/user_password", http.StatusBadRequest)
+		return
+	}
+
+	errOfUpdatingPassword := gDatabase.UpdateUserPassword(string(hashedPassword), userId)
+
+	if errOfUpdatingPassword != nil {
+		http.Redirect(w, r, "/user_password", http.StatusBadRequest)
+		return
+	}
+
+	log.Println("Пароль успешно изменён")
+	http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
 
 }
 
@@ -144,7 +204,7 @@ func SavePersonalInfo(w http.ResponseWriter, r *http.Request) {
 
 	first_name := r.FormValue("first_name")
 	last_name := r.FormValue("last_name")
-	//email := r.FormValue("email")
+	email := r.FormValue("email")
 
 	userId := userModel.GetIdFromJWT(r)
 
@@ -153,7 +213,7 @@ func SavePersonalInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	errOfSavingPersonalInfo := gDatabase.UpdatePersonalInfo(first_name, last_name, userId)
+	errOfSavingPersonalInfo := gDatabase.UpdatePersonalInfo(first_name, last_name, email, userId)
 
 	if errOfSavingPersonalInfo != nil {
 		log.Println("Произошла ошибка при сохранении персональных данных пользователя: ", errOfSavingPersonalInfo)

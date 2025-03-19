@@ -22,48 +22,55 @@ header {
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: height 0.5s ease;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     z-index: 1000;
 }
 
 .logo {
-  height: 100%;
-  width: 10%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    height: 100%;
+    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .logo_button {
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  width: 60px;
-  height: 60px;
-  transition: transform 0.3s;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    width: 60px;
+    height: 60px;
+    transition: transform 0.3s;
 }
 
 .logo_button img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  border-radius: 15px;
-  border: 2px solid #fff;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 15px;
+    border: 2px solid #fff;
+    transition: border-color 0.3s ease;
+}
+
+.logo_button:hover img {
+    border-color: #0ec138;
 }
 
 .logo_button:hover {
-  transform: scale(1.1);
+    transform: scale(1.1);
 }
 
 .profile-container {
     background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 600px;
-    height: 50%;
-    padding: 20px;
+    max-width: 800px;
+    height: auto;
+    padding: 30px;
+    margin-top: 10vh;
 }
 
 .profile-header {
@@ -72,8 +79,9 @@ header {
 }
 
 .profile-header h1 {
-    font-size: 24px;
+    font-size: 28px;
     color: #333;
+    font-weight: bold;
 }
 
 .profile-form {
@@ -83,35 +91,78 @@ header {
 
 .profile-form label {
     font-weight: bold;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     color: #555;
+    font-size: 14px;
 }
 
 .profile-form input[type="text"],
-.profile-form input[type="email"] {
-    padding: 10px;
+.profile-form input[type="email"],
+.profile-form input[type="password"] {
+    padding: 12px;
     margin-bottom: 15px;
     border: 1px solid #ccc;
-    border-radius: 5px;
+    border-radius: 8px;
     font-size: 16px;
+    transition: border-color 0.3s ease;
 }
 
-.profile-form input[type="submit"] {
-    padding: 10px; 
-    background-color: #40ba9d;
-    color: #fff;
+.profile-form input[type="text"]:focus,
+.profile-form input[type="email"]:focus,
+.profile-form input[type="password"]:focus {
+    border-color: #068023;
+    outline: none;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column; /* Кнопки в столбик */
+    align-items: center; /* Центрируем кнопки по горизонтали */
+    gap: 20px; /* Отступ между кнопками */
+    margin-top: 20px;
+}
+
+.save,
+.exit {
+    padding: 12px 24px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     font-size: 16px;
+    font-weight: bold;
+    color: #fff;
     cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    text-align: center;
+    width: 100%; /* Кнопки занимают всю ширину */
+    max-width: 300px; /* Ограничение ширины кнопок */
 }
 
-.profile-form input[type="submit"]:hover {
-    background-color: #4ad7b6;
+.save {
+    background-color: #068023;
 }
 
-@media (max-width: 600px) {
+.save:hover {
+    background-color: #0ec138;
+    transform: scale(1.05);
+}
+
+.exit {
+    background-color: #6f0707;
+}
+
+.exit:hover {
+    background-color: #e62b2b;
+    transform: scale(1.05);
+}
+
+@media (max-width: 800px) {
     .profile-container {
-        padding: 15px;
+        padding: 20px;
+    }
+
+    .save,
+    .exit {
+        width: 100%;
+        margin: 10px 0;
     }
 }

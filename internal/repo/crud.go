@@ -44,6 +44,25 @@ func (d *Database) CheckPassword(email, password string) bool {
 	}
 }
 
+func (d *Database) CheckPasswordById(userId int, password string) bool {
+	var password_hash string
+	err := d.db.QueryRow("select password_hash from svm_network.users where id = ?", userId).Scan(&password_hash)
+
+	if err != nil {
+		log.Println("Ошибка: ", err)
+	}
+
+	errOfCheckHash := bcrypt.CompareHashAndPassword([]byte(password_hash), []byte(password))
+
+	if errOfCheckHash != nil {
+		log.Println("Пароли не совпадают: ", errOfCheckHash)
+		return false
+	} else {
+		log.Println("Пароли совпадают")
+		return true
+	}
+}
+
 func (d *Database) GetUserId(email string) int {
 	var userId int
 	err := d.db.QueryRow("select id from svm_network.users where email = ?", email).Scan(&userId)
@@ -88,8 +107,26 @@ func (d *Database) AddPersonalInfo(first_name, last_name, email string, userId i
 	return nil
 }
 
-func (d *Database) UpdatePersonalInfo(first_name, last_name string, userId int) error {
+func (d *Database) UpdatePersonalInfo(first_name, last_name, email string, userId int) error {
 	_, errOfUpdating := d.db.Exec("update svm_network.user_profiles set first_name = ?, last_name = ? where user_id = ?", first_name, last_name, userId)
+
+	if errOfUpdating != nil {
+		log.Println(errOfUpdating)
+		return errOfUpdating
+	}
+
+	_, errOfUpdatingEmail := d.db.Exec("update svm_network.users set email = ? where id = ?", email, userId)
+
+	if errOfUpdatingEmail != nil {
+		log.Println(errOfUpdatingEmail)
+		return errOfUpdatingEmail
+	}
+
+	return nil
+}
+
+func (d *Database) UpdateUserPassword(newPassword string, userId int) error {
+	_, errOfUpdating := d.db.Exec("update svm_network.users set password_hash = ? where id = ?", newPassword, userId)
 
 	if errOfUpdating != nil {
 		log.Println(errOfUpdating)
@@ -107,6 +144,12 @@ func (d *Database) LoadPersonalInfo(userId int) userModel.UserProfile {
 
 	if errOfLoading != nil {
 		log.Println(errOfLoading)
+	}
+
+	errOfLoadingSecret := d.db.QueryRow("select email from svm_network.users where id = ?", userId).Scan(&userProfile.Email)
+
+	if errOfLoadingSecret != nil {
+		log.Println(errOfLoadingSecret)
 	}
 
 	return userProfile
