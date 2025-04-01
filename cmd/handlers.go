@@ -73,7 +73,7 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request) {
 
 	oldPassword := r.FormValue("old-password")
 	newPassword := r.FormValue("new-passsword")
-	//confirmPassword := r.FormValue("confirm-password")
+	confirmPassword := r.FormValue("confirm-password")
 
 	userId := userModel.GetIdFromJWT(r)
 
@@ -90,11 +90,11 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// if newPassword != confirmPassword {
-	// 	log.Println("Новые пароли не совпадают")
-	// 	http.Redirect(w, r, "/user_password", http.StatusBadRequest)
-	// 	return
-	// }
+	if newPassword != confirmPassword {
+		log.Println("Новые пароли не совпадают")
+		http.Redirect(w, r, "/user_password", http.StatusBadRequest)
+		return
+	}
 
 	hashedPassword, errOfHashed := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
 
@@ -104,7 +104,7 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	errOfUpdatingPassword := gDatabase.UpdateUserPassword(string(hashedPassword), userId)
+	errOfUpdatingPassword := gDatabase.UpdateUserPassword(hashedPassword, userId)
 
 	if errOfUpdatingPassword != nil {
 		http.Redirect(w, r, "/user_password", http.StatusBadRequest)
@@ -113,7 +113,6 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("Пароль успешно изменён")
 	http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
-
 }
 
 func Autorization(w http.ResponseWriter, r *http.Request) {
@@ -208,20 +207,37 @@ func SavePersonalInfo(w http.ResponseWriter, r *http.Request) {
 
 	userId := userModel.GetIdFromJWT(r)
 
-	if userId == 0 {
+	personalInfoExist := gDatabase.CheckExistPersonalInfo(userId)
+
+	if !personalInfoExist {
+		errOfAddingPersonalInfo := gDatabase.AddPersonalInfo(first_name, last_name, email, userId)
+
+		if errOfAddingPersonalInfo != nil {
+			log.Println(errOfAddingPersonalInfo)
+			http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
+			return
+		} else {
+			http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
+			return
+		}
+
+	} else {
+		if userId == 0 {
+			http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
+			return
+		}
+
+		errOfSavingPersonalInfo := gDatabase.UpdatePersonalInfo(first_name, last_name, email, userId)
+
+		if errOfSavingPersonalInfo != nil {
+			log.Println("Произошла ошибка при сохранении персональных данных пользователя: ", errOfSavingPersonalInfo)
+			http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
+		}
+
+		log.Println("Персональные данные пользователя успешно сохранены!")
 		http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
 		return
 	}
-
-	errOfSavingPersonalInfo := gDatabase.UpdatePersonalInfo(first_name, last_name, email, userId)
-
-	if errOfSavingPersonalInfo != nil {
-		log.Println("Произошла ошибка при сохранении персональных данных пользователя: ", errOfSavingPersonalInfo)
-		http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
-	}
-
-	log.Println("Персональные данные пользователя успешно сохранены!")
-	http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
 }
 
 func ExitFromLk(w http.ResponseWriter, r *http.Request) {

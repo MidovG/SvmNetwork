@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"fmt"
 	"log"
 	"svm/internal/entity/userModel"
 	"time"
@@ -26,6 +27,7 @@ func (d *Database) AddNewUser(username, email, password string) error {
 }
 
 func (d *Database) CheckPassword(email, password string) bool {
+	fmt.Println(password)
 	var password_hash string
 	err := d.db.QueryRow("select password_hash from svm_network.users where email = ?", email).Scan(&password_hash)
 
@@ -107,6 +109,19 @@ func (d *Database) AddPersonalInfo(first_name, last_name, email string, userId i
 	return nil
 }
 
+func (d *Database) CheckExistPersonalInfo(userId int) bool {
+	var userID string
+	err := d.db.QueryRow("select user_id from svm_network.user_profiles where user_id = ?", userId).Scan(&userID)
+
+	if err != nil {
+		log.Println("Персональных данных для такого пользователя нет")
+		return false
+	} else {
+		log.Println("Персональные данные найдены")
+		return true
+	}
+}
+
 func (d *Database) UpdatePersonalInfo(first_name, last_name, email string, userId int) error {
 	_, errOfUpdating := d.db.Exec("update svm_network.user_profiles set first_name = ?, last_name = ? where user_id = ?", first_name, last_name, userId)
 
@@ -125,7 +140,7 @@ func (d *Database) UpdatePersonalInfo(first_name, last_name, email string, userI
 	return nil
 }
 
-func (d *Database) UpdateUserPassword(newPassword string, userId int) error {
+func (d *Database) UpdateUserPassword(newPassword []byte, userId int) error {
 	_, errOfUpdating := d.db.Exec("update svm_network.users set password_hash = ? where id = ?", newPassword, userId)
 
 	if errOfUpdating != nil {
