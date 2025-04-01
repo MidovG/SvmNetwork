@@ -10,359 +10,428 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <header>
-        <button class="menu-toggle" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
-        <h1 class="logo" style="color: white; margin-left: 20px; font-family: 'Fraunces', serif; font-size: 2.5rem;">Midover</h1>
-        <button class="theme-toggle" onclick="toggleTheme()">
-            <i class="fas fa-sun" id="themeIcon"></i>
-        </button>
-    </header>
-
-    <nav class="sidebar" id="sidebar">
-        <ul>
-            <li><a href="/personal_lk">Личный кабинет</a></li>
-            <li><a href="/about_us">О нас</a></li>
-        </ul>
-    </nav>
-
-    <div class="container">
-        <section id="metrics" class="metric-section">
-            <div class="metric-card">
-                <div class="metric-value">98.5%</div>
-                <div class="metric-label">Accuracy</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-value">0.97</div>
-                <div class="metric-label">F1-Score</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-value">0.99</div>
-                <div class="metric-label">AUC-ROC</div>
-            </div>
-        </section>
-
-        <section id="network" class="network-section">
-            <div class="network-card">
-                <div class="network-value">Cетевой трафик</div>
-                <div class="network-label">
-                    Сетевой трафик — это поток данных, передаваемых между устройствами в компьютерной сети. Он представляет собой совокупность всех пакетов информации, которые перемещаются через сеть для обеспечения связи между различными узлами (например, компьютерами, серверами, роутерами и другими устройствами). Качество и характеристики сетевого трафика могут значительно влиять на производительность сети и её способность удовлетворять потребности пользователей.
-                </div>
-            </div>
-        </section>
-
-        <section id="image-section" class="image-section">
-            <div class="image-card">
-                <img src="/static/img/anomalies.png">
-            </div>
-        </section>
-
-        <section id="anomalies" class="anomalies-section">
-            <div class="anomalies-card">
-                <div class="anomalies-value">Аномалии</div>
-                <div class="anomalies-label">
-                    Аномалии сетевого трафика — это необычные или подозрительные паттерны передачи данных в компьютерной сети, которые отклоняются от нормального или ожидаемого поведения. Такие аномалии могут указывать на различные проблемы, такие как кибератаки, сбои оборудования, ошибки конфигурации или другие неполадки.
-                </div>
-            </div>
-        </section>
-
-        <!-- Секция анализа -->
-        <section id="analysis">
-            <div class="dropzone-section" id="uploadSection">
-                <div class="dropzone" id="dropzone">
-                    <i class="fas fa-cloud-upload-alt fa-3x"></i>
-                    <p>Перетащите TXT/JSON файлы<br>или</p>
-                    <input type="file" multiple id="fileInput">
-                    <button class="analyze-btn" onclick="analyzeFiles()">Анализировать</button>
-                </div>
-            </div>
-
-            <!-- Результаты анализа -->
-            <div class="analysis-results" id="resultsSection">
-                <div class="result-card">
-                    <h2>Результаты анализа</h2>
-                    <table class="result-table">
-                        <thead>
-                            <tr>
-                                <th>Параметр</th>
-                                <th>Значение</th>
-                            </tr>
-                        </thead>
-                        <tbody id="resultTableBody">
-                            <!-- Сюда будут добавляться строки динамически -->
-                        </tbody>
-                    </table>
-                    <div class="status-section">
-                        <span class="anomaly-badge-label" id="statusBadgeLabel">Статус</span>
-                        <span class="anomaly-badge" id="statusBadge"></span>
-                    </div>
-                    <button class="analyze-btn" onclick="exportResults()">Экспорт CSV</button>
-                    <!-- График -->
-                    <!-- В секции с графиками -->
-                    <div class="chart-container">
-                        <canvas id="barChart" width="400" height="200"></canvas>
-                        <canvas id="durationChart" width="400" height="200"></canvas>
-                        <canvas id="rateChart" width="400" height="200"></canvas>
-                    </div>
-                </div>
-            </div>
-        </section>
+    <div class="overlay" id="overlay">
     </div>
-
-    <footer>
-        <p>© 2025 Midover</p>
-        <script src="/static/js/scroll_footer.js"></script>
-    </footer>
-
-    <script>
-        let theme = localStorage.getItem('theme') || 'dark';
-
-        function toggleTheme() {
-            const body = document.body;
-            const icon = document.getElementById('themeIcon');
-            
-            theme = theme === 'dark' ? 'light' : 'dark';
-            body.classList.toggle('light-theme', theme === 'light');
-            
-            icon.className = `fas ${theme === 'light' ? 'fa-moon' : 'fa-sun'}`;
-            
-            localStorage.setItem('theme', theme);
-        }
-
-        function toggleMenu() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('active');
-        }
-
-        function analyzeFiles() {
-            const fileInput = document.getElementById('fileInput');
-            const resultsSection = document.getElementById('resultsSection');
-            const uploadSection = document.getElementById('uploadSection');
-            const resultTableBody = document.getElementById('resultTableBody');
-            const loading = document.getElementById('loading');
-
-            // Очищаем таблицу перед новым анализом
-            resultTableBody.innerHTML = '';
-
-            // Проверяем, что файл выбран
-            if (fileInput.files.length === 0) {
-                alert("Пожалуйста, выберите файл.");
-                return;
-            }
-
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-
-            reader.onload = function (event) {
-                try {
-                    // Читаем содержимое файла как строку
-                    const fileContent = event.target.result;
-
-                    // Преобразуем данные в массив и затем в JSON
-                    const dataArray = fileContent.split(',').map(item => item.trim());
-
-                    // Создаём объект с ключами feature1, feature2, ..., feature41
-                    const jsonData = {};
-                    for (let i = 0; i < 41; i++) {
-                        jsonData[`feature${i + 1}`] = dataArray[i] || ''; // Если данных меньше 41, заполняем пустыми строками
-                    }
-
-                    // Отправляем JSON на сервер
-                    fetch('http://127.0.0.1:5000/predict', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(jsonData)
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`Ошибка HTTP: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-    const prediction = data.prediction;
+        <header>
+            <button class="menu-toggle" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+            <h1 class="logo" style="color: white; margin-left: 20px; font-family: 'Fraunces', serif; font-size: 2.5rem;">Midover</h1>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <i class="fas fa-sun" id="themeIcon"></i>
+            </button>
+        </header>
     
-    // Обновляем статус
-    const statusBadge = document.getElementById('statusBadge');
-    statusBadge.className = `anomaly-badge ${prediction === 0 ? 'status-normal' : 'status-anomaly'}`;
-    statusBadge.textContent = `${prediction === 0 ? 'Normal' : 'Anomaly'}`;
+        <nav class="sidebar" id="sidebar">
+            <ul>
+                <li><a href="/personal_lk">Личный кабинет</a></li>
+                <li><a href="/about_us">О нас</a></li>
+            </ul>
+        </nav>
     
-    // Создаем массив ключевых параметров с единицами измерения
-    const keyParams = [
-        { name: 'Продолжительность соединения', value: parseFloat(jsonData.feature3).toFixed(2), unit: 'сек' },
-        { name: 'Количество соединений', value: parseInt(jsonData.feature4), unit: 'шт' },
-        { name: 'Объем данных от источника', value: parseInt(jsonData.feature5), unit: 'байт' },
-        { name: 'Объем данных к получателю', value: parseInt(jsonData.feature6), unit: 'байт' },
-        { name: 'Частота ошибок SYN', value: (parseFloat(jsonData.feature25) * 100).toFixed(2), unit: '%' },
-        { name: 'Частота ошибок REJ', value: (parseFloat(jsonData.feature27) * 100).toFixed(2), unit: '%' }
-    ];
+        <div class="container">
+            <section id="metrics" class="metric-section">
+                <div class="metric-card">
+                    <div class="metric-value">98.5%</div>
+                    <div class="metric-label">Accuracy</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">0.97</div>
+                    <div class="metric-label">F1-Score</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">0.99</div>
+                    <div class="metric-label">AUC-ROC</div>
+                </div>
+            </section>
     
-    // Добавляем строки с параметрами
-    keyParams.forEach(param => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${param.name}</td>
-            <td>${param.value} ${param.unit}</td>
-        `;
-        resultTableBody.appendChild(row);
+            <section id="network" class="network-section">
+                <div class="network-card">
+                    <div class="network-value">Cетевой трафик</div>
+                    <div class="network-label">
+                        Сетевой трафик — это поток данных, передаваемых между устройствами в компьютерной сети. Он представляет собой совокупность всех пакетов информации, которые перемещаются через сеть для обеспечения связи между различными узлами (например, компьютерами, серверами, роутерами и другими устройствами). Качество и характеристики сетевого трафика могут значительно влиять на производительность сети и её способность удовлетворять потребности пользователей.
+                    </div>
+                </div>
+            </section>
+    
+            <section id="image-section" class="image-section">
+                <div class="slideshow-container">
+                    <div class="mySlides fade">
+                        <div class="image-card">
+                            <img src="/static/img/anomalies.png" alt="Image 1">
+                        </div>
+                    </div>
+                    <div class="mySlides fade">
+                        <div class="image-card">
+                            <img src="/static/img/anomalies.png" alt="Image 2">
+                        </div>
+                    </div>
+                    <div class="mySlides fade">
+                        <div class="image-card">
+                            <img src="/static/img/anomalies.png" alt="Image 3">
+                        </div>
+                    </div>
+            
+                    <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+                    <a class="next" onclick="plusSlides(1)">&#10095;</a>
+                </div>
+            </section>
+    
+            <section id="anomalies" class="anomalies-section">
+                <div class="anomalies-card">
+                    <div class="anomalies-value">Аномалии</div>
+                    <div class="anomalies-label">
+                        Аномалии сетевого трафика — это необычные или подозрительные паттерны передачи данных в компьютерной сети, которые отклоняются от нормального или ожидаемого поведения. Такие аномалии могут указывать на различные проблемы, такие как кибератаки, сбои оборудования, ошибки конфигурации или другие неполадки.
+                    </div>
+                </div>
+            </section>
+    
+            <!-- Секция анализа -->
+            <section id="analysis">
+                <div class="dropzone-section" id="uploadSection">
+                    <div class="dropzone" id="dropzone">
+                        <i class="fas fa-cloud-upload-alt fa-3x"></i>
+                        <p>Перетащите TXT/JSON файлы<br>или</p>
+                        <input type="file" multiple id="fileInput">
+                        <button class="analyze-btn" onclick="analyzeFiles()">Анализировать</button>
+                    </div>
+                </div>
+    
+                <!-- Результаты анализа -->
+                <div class="analysis-results" id="resultsSection">
+                    <div class="result-card">
+                        <h2>Результаты анализа</h2>
+                        <table class="result-table">
+                            <thead>
+                                <tr>
+                                    <th>Параметр</th>
+                                    <th>Значение</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultTableBody">
+                                <!-- Сюда будут добавляться строки динамически -->
+                            </tbody>
+                        </table>
+                        <div class="status-section">
+                            <span class="anomaly-badge-label" id="statusBadgeLabel">Статус</span>
+                            <span class="anomaly-badge" id="statusBadge"></span>
+                        </div>
+                        <button class="analyze-btn" onclick="exportResults()">Экспорт CSV</button>
+                        <!-- График -->
+                        <!-- В секции с графиками -->
+                        <div class="chart-container">
+                            <canvas id="barChart" width="400" height="200"></canvas>
+                            <canvas id="durationChart" width="400" height="200"></canvas>
+                            <canvas id="rateChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    
+        <footer>
+            <p>© 2025 Midover</p>
+            <script src="/static/js/scroll_footer.js"></script>
+        </footer>
+    
+        <script>
+            let slideIndex = 0;
+    
+    // Инициализация слайд-шоу при загрузке страницы
+    document.addEventListener("DOMContentLoaded", function () {
+        showSlides(slideIndex);
     });
     
-    // Строим графики
-    drawBarChart(jsonData);
+    function showSlides(n) {
+        let slides = document.getElementsByClassName("mySlides");
     
-    // Показываем результаты
-    uploadSection.style.display = 'none';
-    resultsSection.style.display = 'block';
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-})
-                    .catch(error => {
-                        console.error('Ошибка:', error);
-                        alert(`Ошибка: ${error.message}`);
-                    });
-                } catch (error) {
-                    console.error('Ошибка при обработке файла:', error);
-                    alert(`Ошибка при обработке файла: ${error.message}`);
-                }
-            };
-
-            // Начинаем чтение файла
-            reader.readAsText(file);
-
-            // Показываем индикатор загрузки
-            loading.style.display = 'block';
+        // Скрываем все слайды
+        for (let i = 0; i < slides.length; i++) {
+            slides[i].style.display = "none";
         }
-
-        function drawBarChart(data) {
-        // Получаем значения 5-го и 6-го параметров
-        const srcBytes = parseFloat(data.feature5) || 0;
-        const dstBytes = parseFloat(data.feature6) || 0;
-
-        // Удаляем старый график, если он существует
-        if (window.barChart && typeof window.barChart.destroy === 'function') {
-            window.barChart.destroy();
-        }
-
-        // Создаём новый график
-        const ctx = document.getElementById('barChart').getContext('2d');
-        window.barChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['От источника', 'К получателю'],
-                datasets: [{
-                    label: 'Значение',
-                    data: [srcBytes, dstBytes],
-                    backgroundColor: ['#FF6384', '#36A2EB']
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                },
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Объём данных от источника и объём данных к получателю'
-                    }
-                }
+    
+        // Обновляем индекс текущего слайда
+        slideIndex = (n + slides.length) % slides.length;
+    
+        // Показываем текущий слайд
+        slides[slideIndex].style.display = "block";
+    }
+    
+    function plusSlides(n) {
+        showSlides(slideIndex += n);
+    }
+    
+    // Автоматическая смена слайдов каждые 5 секунд
+    setInterval(function () {
+        plusSlides(1);
+    }, 3000);
+    
+            let theme = localStorage.getItem('theme') || 'dark';
+    
+            function toggleTheme() {
+                const body = document.body;
+                const icon = document.getElementById('themeIcon');
+                
+                theme = theme === 'dark' ? 'light' : 'dark';
+                body.classList.toggle('light-theme', theme === 'light');
+                
+                icon.className = `fas ${theme === 'light' ? 'fa-moon' : 'fa-sun'}`;
+                
+                localStorage.setItem('theme', theme);
             }
-        });
+    
+            function toggleMenu() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
 
-        // Второй график: Duration и Count
-        const duration = parseFloat(data.feature3) || 0;
-        const count = parseFloat(data.feature4) || 0;
-        
-        // Удаляем старый график, если он существует
-        if (window.durationChart && typeof window.durationChart.destroy === 'function') {
-            window.durationChart.destroy();
-        }
-        
-        const ctx2 = document.getElementById('durationChart').getContext('2d');
-        window.durationChart = new Chart(ctx2, {
-            type: 'bar',
-            data: {
-                labels: ['Продолжительность соединения', 'Кол-во соединений'],
-                datasets: [{
-                    label: 'Значение',
-                    data: [duration, count],
-                    backgroundColor: ['#FFCE56', '#4BC0C0']
-                }]
-            },
-            options: {
-                scales: { y: { beginAtZero: true } },
-                plugins: { title: { display: true, text: 'Продолжительность соединения и Кол-во соединений к хосту за 2 сек.' } }
-            }
-        });
+    // Переключаем класс 'active' для Sidebar
+    sidebar.classList.toggle('active');
 
-        // Третий график: serror_rate и rerror_rate
-        const serror = parseFloat(data.feature25) || 0;
-        const rerror = parseFloat(data.feature27) || 0;
-        
-        // Удаляем старый график, если он существует
-        if (window.rateChart && typeof window.rateChart.destroy === 'function') {
-            window.rateChart.destroy();
-        }
-        
-        const ctx3 = document.getElementById('rateChart').getContext('2d');
-        window.durationChart = new Chart(ctx3, {
-            type: 'bar',
-            data: {
-                labels: ['SYN', 'REJ'],
-                datasets: [{
-                    label: 'Значение',
-                    data: [serror, rerror],
-                    backgroundColor: ['#FA7233', '#F12E2E']
-                }]
-            },
-            options: {
-                scales: { y: { beginAtZero: true } },
-                plugins: { title: { display: true, text: 'Частота ошибки SYN vs Частота ошибки REJ' } }
-            }
-        });
+    // Показываем или скрываем виньетку
+    if (sidebar.classList.contains('active')) {
+        overlay.style.display = 'block'; // Показываем виньетку
+    } else {
+        overlay.style.display = 'none'; // Скрываем виньетку
+    }
 }
 
-        function exportResults() {
-            const table = document.querySelector('.result-table');
-            const csv = tableToCSV(table);
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'analysis_results.csv';
-            a.click();
-        }
+// Закрытие меню при клике на виньетку
+document.getElementById('overlay').addEventListener('click', function () {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
 
-        function tableToCSV(table) {
-            const rows = [];
-            // Добавляем статус как первую строку
-            rows.push(`Статус,${document.getElementById('statusBadge').textContent}`);
-            rows.push('');
-            
-            // Получаем заголовки
-            const headers = Array.from(table.querySelectorAll('th')).map(th => th.textContent.trim());
-            rows.push(headers.join(','));
-            
-            // Получаем данные строк
-            table.querySelectorAll('tr').forEach(tr => {
-                const cols = Array.from(tr.querySelectorAll('td')).map(td => td.textContent.trim());
-                if (cols.length > 0) rows.push(cols.join(','));
-            });
-
-            return rows.join('\n');
-        }
-
-        // Дропзона анимация
-        const dropzone = document.getElementById('dropzone');
-        dropzone.ondragover = (e) => {
-            e.preventDefault();
-            dropzone.style.borderColor = '#64ffda';
-        };
-        dropzone.ondragleave = () => {
-            dropzone.style.borderColor = getComputedStyle(dropzone).borderColor;
-        };
+    sidebar.classList.remove('active'); // Убираем класс 'active'
+    overlay.style.display = 'none'; // Скрываем виньетку
+});
+    
+            function analyzeFiles() {
+                const fileInput = document.getElementById('fileInput');
+                const resultsSection = document.getElementById('resultsSection');
+                const uploadSection = document.getElementById('uploadSection');
+                const resultTableBody = document.getElementById('resultTableBody');
+                const loading = document.getElementById('loading');
+    
+                // Очищаем таблицу перед новым анализом
+                resultTableBody.innerHTML = '';
+    
+                // Проверяем, что файл выбран
+                if (fileInput.files.length === 0) {
+                    alert("Пожалуйста, выберите файл.");
+                    return;
+                }
+    
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+    
+                reader.onload = function (event) {
+                    try {
+                        // Читаем содержимое файла как строку
+                        const fileContent = event.target.result;
+    
+                        // Преобразуем данные в массив и затем в JSON
+                        const dataArray = fileContent.split(',').map(item => item.trim());
+    
+                        // Создаём объект с ключами feature1, feature2, ..., feature41
+                        const jsonData = {};
+                        for (let i = 0; i < 41; i++) {
+                            jsonData[`feature${i + 1}`] = dataArray[i] || ''; // Если данных меньше 41, заполняем пустыми строками
+                        }
+    
+                        // Отправляем JSON на сервер
+                        fetch('http://127.0.0.1:5000/predict', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(jsonData)
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`Ошибка HTTP: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+        const prediction = data.prediction;
         
-    </script>
+        // Обновляем статус
+        const statusBadge = document.getElementById('statusBadge');
+        statusBadge.className = `anomaly-badge ${prediction === 0 ? 'status-normal' : 'status-anomaly'}`;
+        statusBadge.textContent = `${prediction === 0 ? 'Normal' : 'Anomaly'}`;
+        
+        // Создаем массив ключевых параметров с единицами измерения
+        const keyParams = [
+            { name: 'Продолжительность соединения', value: parseFloat(jsonData.feature3).toFixed(2), unit: 'сек' },
+            { name: 'Количество соединений', value: parseInt(jsonData.feature4), unit: 'шт' },
+            { name: 'Объем данных от источника', value: parseInt(jsonData.feature5), unit: 'байт' },
+            { name: 'Объем данных к получателю', value: parseInt(jsonData.feature6), unit: 'байт' },
+            { name: 'Частота ошибок SYN', value: (parseFloat(jsonData.feature25) * 100).toFixed(2), unit: '%' },
+            { name: 'Частота ошибок REJ', value: (parseFloat(jsonData.feature27) * 100).toFixed(2), unit: '%' }
+        ];
+        
+        // Добавляем строки с параметрами
+        keyParams.forEach(param => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${param.name}</td>
+                <td>${param.value} ${param.unit}</td>
+            `;
+            resultTableBody.appendChild(row);
+        });
+        
+        // Строим графики
+        drawBarChart(jsonData);
+        
+        // Показываем результаты
+        uploadSection.style.display = 'none';
+        resultsSection.style.display = 'block';
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    })
+                        .catch(error => {
+                            console.error('Ошибка:', error);
+                            alert(`Ошибка: ${error.message}`);
+                        });
+                    } catch (error) {
+                        console.error('Ошибка при обработке файла:', error);
+                        alert(`Ошибка при обработке файла: ${error.message}`);
+                    }
+                };
+    
+                // Начинаем чтение файла
+                reader.readAsText(file);
+    
+                // Показываем индикатор загрузки
+                loading.style.display = 'block';
+            }
+    
+            function drawBarChart(data) {
+            // Получаем значения 5-го и 6-го параметров
+            const srcBytes = parseFloat(data.feature5) || 0;
+            const dstBytes = parseFloat(data.feature6) || 0;
+    
+            // Удаляем старый график, если он существует
+            if (window.barChart && typeof window.barChart.destroy === 'function') {
+                window.barChart.destroy();
+            }
+    
+            // Создаём новый график
+            const ctx = document.getElementById('barChart').getContext('2d');
+            window.barChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['От источника', 'К получателю'],
+                    datasets: [{
+                        label: 'Значение',
+                        data: [srcBytes, dstBytes],
+                        backgroundColor: ['#FF6384', '#36A2EB']
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Объём данных от источника и объём данных к получателю'
+                        }
+                    }
+                }
+            });
+    
+            // Второй график: Duration и Count
+            const duration = parseFloat(data.feature3) || 0;
+            const count = parseFloat(data.feature4) || 0;
+            
+            // Удаляем старый график, если он существует
+            if (window.durationChart && typeof window.durationChart.destroy === 'function') {
+                window.durationChart.destroy();
+            }
+            
+            const ctx2 = document.getElementById('durationChart').getContext('2d');
+            window.durationChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Продолжительность соединения', 'Кол-во соединений'],
+                    datasets: [{
+                        label: 'Значение',
+                        data: [duration, count],
+                        backgroundColor: ['#FFCE56', '#4BC0C0']
+                    }]
+                },
+                options: {
+                    scales: { y: { beginAtZero: true } },
+                    plugins: { title: { display: true, text: 'Продолжительность соединения и Кол-во соединений к хосту за 2 сек.' } }
+                }
+            });
+    
+            // Третий график: serror_rate и rerror_rate
+            const serror = parseFloat(data.feature25) || 0;
+            const rerror = parseFloat(data.feature27) || 0;
+            
+            // Удаляем старый график, если он существует
+            if (window.rateChart && typeof window.rateChart.destroy === 'function') {
+                window.rateChart.destroy();
+            }
+            
+            const ctx3 = document.getElementById('rateChart').getContext('2d');
+            window.durationChart = new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: ['SYN', 'REJ'],
+                    datasets: [{
+                        label: 'Значение',
+                        data: [serror, rerror],
+                        backgroundColor: ['#FA7233', '#F12E2E']
+                    }]
+                },
+                options: {
+                    scales: { y: { beginAtZero: true } },
+                    plugins: { title: { display: true, text: 'Частота ошибки SYN vs Частота ошибки REJ' } }
+                }
+            });
+    }
+    
+            function exportResults() {
+                const table = document.querySelector('.result-table');
+                const csv = tableToCSV(table);
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'analysis_results.csv';
+                a.click();
+            }
+    
+            function tableToCSV(table) {
+                const rows = [];
+                // Добавляем статус как первую строку
+                rows.push(`Статус,${document.getElementById('statusBadge').textContent}`);
+                rows.push('');
+                
+                // Получаем заголовки
+                const headers = Array.from(table.querySelectorAll('th')).map(th => th.textContent.trim());
+                rows.push(headers.join(','));
+                
+                // Получаем данные строк
+                table.querySelectorAll('tr').forEach(tr => {
+                    const cols = Array.from(tr.querySelectorAll('td')).map(td => td.textContent.trim());
+                    if (cols.length > 0) rows.push(cols.join(','));
+                });
+    
+                return rows.join('\n');
+            }
+    
+            // Дропзона анимация
+            const dropzone = document.getElementById('dropzone');
+            dropzone.ondragover = (e) => {
+                e.preventDefault();
+                dropzone.style.borderColor = '#64ffda';
+            };
+            dropzone.ondragleave = () => {
+                dropzone.style.borderColor = getComputedStyle(dropzone).borderColor;
+            };
+            
+        </script>
 </body>
 </html>

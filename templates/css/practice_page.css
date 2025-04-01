@@ -27,6 +27,19 @@ body {
     background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
 }
 
+/* Стили для затемнения фона (виньетки) */
+.overlay {
+    display: none; /* Скрыто по умолчанию */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Полупрозрачный черный фон */
+    z-index: 999; /* Ниже бокового меню, но выше остального контента */
+    backdrop-filter: blur(4px); /* Дополнительный эффект размытия */
+}
+
 .container {
     max-width: 1440px;
     margin: 0 auto;
@@ -84,17 +97,17 @@ header {
     height: 48px;
 }
 
-/* Боковое меню */
 .sidebar {
     position: fixed;
-    top: 0; /* Оставляем top: 0, но добавим padding-top */
+    top: 0;
     left: -280px;
-    width: 245px;
+    width: 255px;
     height: 100%;
     background: var(--surface);
-    padding: 90px 20px 20px; /* Добавляем padding-top: 90px (высота header + отступ) */
+    padding: 90px 20px 20px;
     transition: all 1s;
-    box-shadow: 0 0 30px rgba(0,0,0,0.15);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+    z-index: 1000; /* Выше виньетки */
 }
 
 .sidebar.active {
@@ -231,16 +244,62 @@ nav.sidebar ul li a.active::before {
     text-align: center;
 }
 
+/* Стили для контейнера слайд-шоу */
+.slideshow-container {
+    position: relative;
+    max-width: 700px;
+    margin: auto;
+    overflow: hidden;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Скрываем все слайды, кроме активного */
+.mySlides {
+    display: none;
+    animation: fade 1.5s ease-in-out;
+}
+
+/* Анимация плавного перехода между слайдами */
+@keyframes fade {
+    from { opacity: 0.4; }
+    to { opacity: 1; }
+}
+
+/* Стили для кнопок "Назад" и "Вперед" */
+.prev, .next {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    width: auto;
+    padding: 16px;
+    margin-top: -22px;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    transition: 0.6s ease;
+    border-radius: 0 3px 3px 0;
+    user-select: none;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.next {
+    right: 0;
+    border-radius: 3px 0 0 3px;
+}
+
+.prev:hover, .next:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+/* Стили для изображений внутри слайдов */
 .image-card {
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px;
-    border: 1px solid #ccc;
+    background-color: var(--secondary);
     border-radius: 8px;
-    background-color: var(--card-bg);
-    margin: 20px auto;
-    max-width: 700px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
