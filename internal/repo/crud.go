@@ -141,7 +141,7 @@ func (d *Database) UpdatePersonalInfo(first_name, last_name, email string, userI
 }
 
 func (d *Database) UpdateUserPassword(newPassword []byte, userId int) error {
-	_, errOfUpdating := d.db.Exec("update svm_network.users set password_hash = ? where id = ?", newPassword, userId)
+	_, errOfUpdating := d.db.Exec("update svm_network.users set password_hash = ? where id = ?", string(newPassword), userId)
 
 	if errOfUpdating != nil {
 		log.Println(errOfUpdating)

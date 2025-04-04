@@ -28,21 +28,6 @@
         </nav>
     
         <div class="container">
-            <section id="metrics" class="metric-section">
-                <div class="metric-card">
-                    <div class="metric-value">98.5%</div>
-                    <div class="metric-label">Accuracy</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-value">0.97</div>
-                    <div class="metric-label">F1-Score</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-value">0.99</div>
-                    <div class="metric-label">AUC-ROC</div>
-                </div>
-            </section>
-    
             <section id="network" class="network-section">
                 <div class="network-card">
                     <div class="network-value">Cетевой трафик</div>
@@ -57,16 +42,25 @@
                     <div class="mySlides fade">
                         <div class="image-card">
                             <img src="/static/img/anomalies.png" alt="Image 1">
+                            <div class="image-caption">
+                                <a href="https://timeweb.com/ru/community/articles/samye-gromkie-ddos-ataki-v-istorii" target="_blank">Самые крупные DDoS атаки</a>
+                            </div>
                         </div>
                     </div>
                     <div class="mySlides fade">
                         <div class="image-card">
-                            <img src="/static/img/anomalies.png" alt="Image 2">
+                            <img src="/static/img/main_page.png" alt="Image 2">
+                            <div class="image-caption">
+                                <a href="https://stormwall.pro/resources/terms/general/traffic" target="_blank">Подробнее о сетевом трафике</a>
+                            </div>
                         </div>
                     </div>
                     <div class="mySlides fade">
                         <div class="image-card">
-                            <img src="/static/img/anomalies.png" alt="Image 3">
+                            <img src="/static/img/svm_applicability.png" alt="Image 3">
+                            <div class="image-caption">
+                                <a href="https://www.securitylab.ru/analytics/535530.php" target="_blank">Подробнее об аномалиях сетевого трафика</a>
+                            </div>
                         </div>
                     </div>
             
@@ -81,6 +75,47 @@
                     <div class="anomalies-label">
                         Аномалии сетевого трафика — это необычные или подозрительные паттерны передачи данных в компьютерной сети, которые отклоняются от нормального или ожидаемого поведения. Такие аномалии могут указывать на различные проблемы, такие как кибератаки, сбои оборудования, ошибки конфигурации или другие неполадки.
                     </div>
+                    <br>
+                    <br>
+                    <br>
+                    <div class="anomalies-value">DDoS-атаки</div>
+                    <div class="anomalies-label">
+                        DDoS-атака (Distributed Denial of Service, распределенная атака типа "отказ в обслуживании") — это кибератака, направленная на то, чтобы сделать онлайн-сервис или веб-ресурс недоступным для пользователей. Это достигается путем перегрузки целевого сервера, сети или приложения огромным количеством запросов, которые исходят от множества источников одновременно.
+                    </div>
+                </div>
+            </section>
+
+            <section id="anomalies" class="anomalies-section">
+                <div class="anomalies-card">
+                    <div class="anomalies-value">Метрики нашей модели</div>
+                    <br>
+                    <br>
+                    <div class="anomalies-label">
+                        Вы можете не сомневаться в качестве нашего сервиса, потому что модель выдаёт потрясающие параметры
+                    </div>
+                    <br>
+                    <div class="anomalies-label">
+                        Убедитесь в этом ниже
+                    </div>
+                    <br>
+                    <div class="anomalies-label">
+                        <a href="#">Перед использованием прочитайте инструкцию по пользованию сервисом</a>
+                    </div>
+                </div>
+            </section>
+
+            <section id="metrics" class="metric-section">
+                <div class="metric-card">
+                    <div class="metric-value">98.5%</div>
+                    <div class="metric-label">Accuracy</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">0.97</div>
+                    <div class="metric-label">F1-Score</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">0.99</div>
+                    <div class="metric-label">AUC-ROC</div>
                 </div>
             </section>
     
@@ -133,74 +168,74 @@
         </footer>
     
         <script>
-            let slideIndex = 0;
+                let slideIndex = 0;
     
-    // Инициализация слайд-шоу при загрузке страницы
-    document.addEventListener("DOMContentLoaded", function () {
-        showSlides(slideIndex);
-    });
-    
-    function showSlides(n) {
-        let slides = document.getElementsByClassName("mySlides");
-    
-        // Скрываем все слайды
-        for (let i = 0; i < slides.length; i++) {
-            slides[i].style.display = "none";
-        }
-    
-        // Обновляем индекс текущего слайда
-        slideIndex = (n + slides.length) % slides.length;
-    
-        // Показываем текущий слайд
-        slides[slideIndex].style.display = "block";
-    }
-    
-    function plusSlides(n) {
-        showSlides(slideIndex += n);
-    }
-    
-    // Автоматическая смена слайдов каждые 5 секунд
-    setInterval(function () {
-        plusSlides(1);
-    }, 3000);
-    
-            let theme = localStorage.getItem('theme') || 'dark';
-    
-            function toggleTheme() {
-                const body = document.body;
-                const icon = document.getElementById('themeIcon');
+                // Инициализация слайд-шоу при загрузке страницы
+                document.addEventListener("DOMContentLoaded", function () {
+                    showSlides(slideIndex);
+                });
                 
-                theme = theme === 'dark' ? 'light' : 'dark';
-                body.classList.toggle('light-theme', theme === 'light');
+                function showSlides(n) {
+                    let slides = document.getElementsByClassName("mySlides");
                 
-                icon.className = `fas ${theme === 'light' ? 'fa-moon' : 'fa-sun'}`;
+                    // Скрываем все слайды
+                    for (let i = 0; i < slides.length; i++) {
+                        slides[i].style.display = "none";
+                    }
                 
-                localStorage.setItem('theme', theme);
+                    // Обновляем индекс текущего слайда
+                    slideIndex = (n + slides.length) % slides.length;
+                
+                    // Показываем текущий слайд
+                    slides[slideIndex].style.display = "block";
+                }
+                
+                function plusSlides(n) {
+                    showSlides(slideIndex += n);
+                }
+                
+                // Автоматическая смена слайдов каждые 5 секунд
+                setInterval(function () {
+                    plusSlides(1);
+                }, 3000);
+                
+                        let theme = localStorage.getItem('theme') || 'dark';
+                
+                        function toggleTheme() {
+                            const body = document.body;
+                            const icon = document.getElementById('themeIcon');
+                            
+                            theme = theme === 'dark' ? 'light' : 'dark';
+                            body.classList.toggle('light-theme', theme === 'light');
+                            
+                            icon.className = `fas ${theme === 'light' ? 'fa-moon' : 'fa-sun'}`;
+                            
+                            localStorage.setItem('theme', theme);
+                        }
+                
+                        function toggleMenu() {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('overlay');
+
+                // Переключаем класс 'active' для Sidebar
+                sidebar.classList.toggle('active');
+
+                // Показываем или скрываем виньетку
+                if (sidebar.classList.contains('active')) {
+                    overlay.style.display = 'block'; // Показываем виньетку
+                } else {
+                    overlay.style.display = 'none'; // Скрываем виньетку
+                }
             }
-    
-            function toggleMenu() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
 
-    // Переключаем класс 'active' для Sidebar
-    sidebar.classList.toggle('active');
+            // Закрытие меню при клике на виньетку
+            document.getElementById('overlay').addEventListener('click', function () {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('overlay');
 
-    // Показываем или скрываем виньетку
-    if (sidebar.classList.contains('active')) {
-        overlay.style.display = 'block'; // Показываем виньетку
-    } else {
-        overlay.style.display = 'none'; // Скрываем виньетку
-    }
-}
-
-// Закрытие меню при клике на виньетку
-document.getElementById('overlay').addEventListener('click', function () {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-
-    sidebar.classList.remove('active'); // Убираем класс 'active'
-    overlay.style.display = 'none'; // Скрываем виньетку
-});
+                sidebar.classList.remove('active'); // Убираем класс 'active'
+                overlay.style.display = 'none'; // Скрываем виньетку
+            });
     
             function analyzeFiles() {
                 const fileInput = document.getElementById('fileInput');

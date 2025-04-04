@@ -244,6 +244,16 @@ nav.sidebar ul li a.active::before {
     text-align: center;
 }
 
+.anomalies-label a {
+    color:#fff;
+    background-color: #000;
+    text-decoration: none;
+}
+
+.anomalies-label a:hover {
+    color:#40ba9d;
+}
+
 /* Стили для контейнера слайд-шоу */
 .slideshow-container {
     position: relative;
@@ -292,22 +302,74 @@ nav.sidebar ul li a.active::before {
     background: rgba(0, 0, 0, 0.8);
 }
 
-/* Стили для изображений внутри слайдов */
+/* Стили для контейнера слайдов */
+.slideshow-container {
+    position: relative;
+    max-width: 600px; /* Уменьшенная ширина */
+    margin: auto;
+}
+
+/* Стили для карточки с изображением */
 .image-card {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
+    padding: 10px; /* Уменьшенные отступы */
     background-color: var(--secondary);
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin: 10px 0; /* Уменьшенные внешние отступы */
 }
 
 .image-card img {
     width: 100%;
-    height: auto;
+    max-height: 600px; /* Ограничение высоты */
+    object-fit: cover; /* Сохранение пропорций */
     border-radius: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 5px; /* Уменьшенное расстояние до ссылки */
+    transition: filter 0.3s ease; /* Плавный переход для эффекта блюра */
+}
+
+/* Эффект блюра при наведении */
+.image-card:hover img {
+    filter: blur(2px); /* Применяем размытие */
+}
+
+/* Стили для надписи с ссылкой */
+.image-caption {
+    position: absolute;
+    bottom: 15px; /* Уменьшенное расстояние от нижнего края */
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0; /* Начальная прозрачность */
+    visibility: hidden; /* Скрываем элемент */
+    background-color: rgba(0, 0, 0, 0.7); /* Темный фон */
+    color: white;
+    padding: 8px 16px; /* Уменьшенные отступы */
+    border-radius: 15px; /* Уменьшенные закругления */
+    font-size: 14px; /* Уменьшенный размер текста */
+    text-align: center;
+    text-decoration: none;
+    transition: opacity 0.3s ease, visibility 0.3s ease; /* Плавное появление */
+}
+
+/* Появление надписи при наведении */
+.image-card:hover .image-caption {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Стили для ссылки внутри надписи */
+.image-caption a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.image-caption a:hover {
+    text-decoration: underline;
 }
 
 /* Графики */

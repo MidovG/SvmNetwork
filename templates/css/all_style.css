@@ -4,7 +4,7 @@ header {
     left: 0;
     width: 100%;
     height: 10vh;
-    background-color: #ff4b2b;
+    background-color: #252f40;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -14,7 +14,7 @@ header {
 
 .logo {
     height: 100%;
-    width: 10%;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -153,14 +153,14 @@ main {
     margin-top: 10vh; 
     width: 100%;
     height: 80vh;
-    background-color: #fff;
+    background-color: #0f1a2f;
     overflow: hidden;
 }
 
 footer {
     width: 100%;
     height: 10vh;
-    background-color: #ff4b2b;
+    background-color: #252f40;
     display: flex;
     align-items: center;
     justify-content: center;

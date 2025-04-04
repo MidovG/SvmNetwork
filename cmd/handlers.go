@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -72,7 +73,7 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	oldPassword := r.FormValue("old-password")
-	newPassword := r.FormValue("new-passsword")
+	newPassword := r.FormValue("new-password")
 	confirmPassword := r.FormValue("confirm-password")
 
 	userId := userModel.GetIdFromJWT(r)
@@ -90,6 +91,8 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println(newPassword)
+	fmt.Println(confirmPassword)
 	if newPassword != confirmPassword {
 		log.Println("Новые пароли не совпадают")
 		http.Redirect(w, r, "/user_password", http.StatusBadRequest)
