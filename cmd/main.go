@@ -33,5 +33,5 @@ func main() {
 	RenderStaticFiles(r)
 
 	fmt.Println("Server is listening...")
-	http.ListenAndServe(":8181", r)
+	http.ListenAndServe(":8080", r)
 }

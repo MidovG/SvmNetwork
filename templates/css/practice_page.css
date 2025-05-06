@@ -5,12 +5,14 @@
     --accent: #64ffda;
     --light: #e5e7eb;
     --surface: #252f40;
+    --logo-color: white;
     
     /* Светлая тема */
     --light-primary: #ebedf0;
     --light-secondary: #f8fafc;
     --light-accent: #00e5d6;
     --light-surface: #ffffff;
+    --light-logo-color: #1a202c;
 }
 
 * {
@@ -53,6 +55,7 @@ body.light-theme {
     --secondary: var(--light-secondary);
     --accent: var(--light-accent);
     --surface: var(--light-surface);
+    --logo-color: var(--light-logo-color);
     color: #1a202c;
 }
 
@@ -65,6 +68,7 @@ header {
     padding: 15px 20px;
     display: flex;
     align-items: center;
+    gap:9px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     z-index: 1000;
 }
@@ -309,6 +313,12 @@ nav.sidebar ul li a.active::before {
     margin: auto;
 }
 
+.logo {
+    color: var(--logo-color) !important; /* Перекрываем инлайновый стиль */
+    font-family: 'Gill Sans', serif;
+    font-size: 2.5rem;
+}
+
 /* Стили для карточки с изображением */
 .image-card {
     position: relative;
@@ -384,9 +394,9 @@ nav.sidebar ul li a.active::before {
 .dropzone-section {
     min-height: 400px;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
+    justify-content: space-around;
     margin: 120px 0;
     transition: all 0.4s;
 }
@@ -502,6 +512,22 @@ nav.sidebar ul li a.active::before {
 
 .status-anomaly {
     background: linear-gradient(45deg, #e74c3c, #c0392b);
+}
+
+.highlight {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    font-weight: 600;
+    color: #2c3e50;
+    border-left: 4px solid #3498db;
+    padding: 8px 12px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(52, 152, 219, 0.1);
+    transition: all 0.3s ease;
+}
+
+.highlight:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.2);
 }
 
 /* Анимация загрузки */

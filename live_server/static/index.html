@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Мониторинг сетевых аномалий</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #2c3e50;
+        }
+        h1 {
+            color: #1a202c;
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        h1::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #48bb78, #4299e1);
+            margin: 1rem auto 0;
+            border-radius: 2px;
+        }
+        .status-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        .status {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .status-text {
+            margin: 0;
+        }
+        .monitoring .status-indicator {
+            background: #48bb78;
+        }
+        .stopped .status-indicator {
+            background: #f56565;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.9; }
+            50% { opacity: 1; }
+            100% { opacity: 0.9; }
+        }
+        .button-container {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+        .control-button {
+            background: linear-gradient(90deg, #4299e1, #48bb78);
+            padding: 14px 60px;
+            border-radius: 24px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+            border: none;
+            color: white;
+            flex: 1 1 200px;
+            text-align: center;
+        }
+        .clear-button {
+            background: #edf2f7;
+            color: #4a5568;
+            padding: 14px 40px;
+            border-radius: 24px;
+            font-weight: 600;
+            border: 2px solid #e2e8f0;
+            flex: 1 1 200px;
+        }
+        .results-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+            margin-top: 2rem;
+        }
+        .result-item {
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+            background: #f8fafc;
+            border-left: 4px solid #48bb78;
+        }
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .result-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+        .timestamp {
+            font-size: 0.875rem;
+            color: #718096;
+        }
+        .main-info {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .info-container {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+        .basic-info {
+            font-size: 0.875rem;
+            color: #718096;
+        }
+        .toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #4a5568;
+            margin-left: auto;
+        }
+        .hidden-details {
+            margin-top: 1rem;
+            padding: 1rem 1.5rem;
+            border-top: 2px solid #e2e8f0;
+            display: none;
+            background-color: #f9fafb;
+            border-radius: 8px;
+        }
+        .hidden-details div {
+            font-size: 1.0rem;
+            line-height: 2rem;
+            color: #4a5568;
+        }
+        .anomaly {
+            border-left-color: #f56565;
+        }
+        @media (max-width: 768px) {
+            .result-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .button-container {
+                flex-direction: column;
+            }
+            .control-button, .clear-button {
+                width: 100%;
+                padding: 14px;
+            }
+        }
+        /* Дополнительные стили для графика */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 2rem;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        .chartjs-size-monitor {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            pointer-events: none;
+            visibility: hidden;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Мониторинг сети в реальном времени</h1>
+    
+    <div class="status-card">
+        <div id="status" class="status stopped">
+            <div class="status-indicator"></div>
+            <div class="status-text">Мониторинг неактивен</div>
+        </div>
+        <div class="button-container">
+            <button class="control-button" onclick="toggleMonitoring()">Запустить мониторинг</button>
+            <button class="clear-button" onclick="clearResults()">Очистить результаты</button>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="trafficChart"></canvas>
+    </div>
+
+    <div class="results-container">
+        <h3 style="color: #4a5568; margin-bottom: 1rem;">Результаты обнаружения:</h3>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // Объект для преобразования числовых значений протокола в текстовые
+        const protocolMap = {
+            0: 'TCP',
+            1: 'UDP',
+            2: 'ICMP'
+        };
+
+        // Глобальные переменные для графика
+        let trafficChart = null;
+        const MAX_DATA_POINTS = 20;
+
+        // Функция для открытия/закрытия деталей
+        function toggleDetails(button) {
+            const details = button.closest('.result-item').querySelector('.hidden-details');
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+                button.textContent = '▲'; // Стрелка вверх
+            } else {
+                details.style.display = 'none';
+                button.textContent = '▼'; // Стрелка вниз
+            }
+        }
+
+        let isMonitoring = false;
+
+        async function toggleMonitoring() {
+            const response = await fetch(isMonitoring ? '/stop' : '/start');
+            const data = await response.json();
+            isMonitoring = data.is_monitoring;
+            updateStatus();
+            if (isMonitoring) {
+                startPolling();
+                startChartPolling();
+            } else {
+                stopChartPolling();
+            }
+        }
+
+        function updateStatus() {
+            const statusDiv = document.querySelector('.status');
+            const statusText = document.querySelector('.status-text');
+            statusDiv.className = `status ${isMonitoring ? 'monitoring' : 'stopped'}`;
+            statusText.textContent = `Мониторинг ${isMonitoring ? 'активен' : 'неактивен'}`;
+            const controlButton = document.querySelector('.control-button');
+            if (isMonitoring) {
+                controlButton.textContent = 'Остановить мониторинг';
+                controlButton.style.background = 'linear-gradient(90deg, #ed8936, #dd6b20)';
+            } else {
+                controlButton.textContent = 'Запустить мониторинг';
+                controlButton.style.background = 'linear-gradient(90deg, #4299e1, #48bb78)';
+            }
+        }
+
+        async function startPolling() {
+            while (isMonitoring) {
+                try {
+                    const response = await fetch('/results');
+                    const results = await response.json();
+                    updateResults(results);
+                } catch (error) {
+                    console.error('Ошибка опроса:', error);
+                }
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+
+        function formatBytes(bytes) {
+            const units = ['B', 'KB', 'MB', 'GB'];
+            let index = 0;
+            while (bytes >= 1024 && index < units.length - 1) {
+                bytes /= 1024;
+                index++;
+            }
+            return bytes.toFixed(1) + units[index];
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('trafficChart');
+            trafficChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Байты источника',
+                            data: [],
+                            borderColor: '#48bb78',
+                            backgroundColor: 'rgba(72, 187, 120, 0.1)',
+                            tension: 0.3,
+                            pointRadius: 0,
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Байты получателя',
+                            data: [],
+                            borderColor: '#4299e1',
+                            backgroundColor: 'rgba(66, 153, 225, 0.1)',
+                            tension: 0.3,
+                            pointRadius: 0,
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return formatBytes(value);
+                                }
+                            }
+                        },
+                        x: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart(incoming, outgoing) {
+            if (!trafficChart) return;
+
+            const now = new Date().toLocaleTimeString();
+            
+            // Добавляем новые данные
+            trafficChart.data.labels.push(now);
+            trafficChart.data.datasets[0].data.push(incoming);
+            trafficChart.data.datasets[1].data.push(outgoing);
+
+            // Удаляем старые данные, если превышен лимит
+            if (trafficChart.data.labels.length > MAX_DATA_POINTS) {
+                trafficChart.data.labels.shift();
+                trafficChart.data.datasets[0].data.shift();
+                trafficChart.data.datasets[1].data.shift();
+            }
+
+            // Обновляем график
+            trafficChart.update({ duration: 0 });
+        }
+
+        function clearChart() {
+            if (trafficChart) {
+                trafficChart.data.labels = [];
+                trafficChart.data.datasets[0].data = [];
+                trafficChart.data.datasets[1].data = [];
+                trafficChart.update({ duration: 0 });
+            }
+        }
+
+        function startChartPolling() {
+            // Очистка предыдущего интервала, если существует
+            if (window.chartInterval) {
+                clearInterval(window.chartInterval);
+            }
+            
+            window.chartInterval = setInterval(async () => {
+                if (!isMonitoring) return;
+                
+                try {
+                    const response = await fetch('/results');
+                    const results = await response.json();
+                    
+                    if (results.length > 0) {
+                        const lastResult = results[results.length - 1];
+                        const incoming = lastResult.features.feature5 || 0;
+                        const outgoing = lastResult.features.feature6 || 0;
+                        updateChart(incoming, outgoing);
+                    }
+                } catch (error) {
+                    console.error('Ошибка обновления графика:', error);
+                }
+            }, 1000);
+        }
+
+        function stopChartPolling() {
+            if (window.chartInterval) {
+                clearInterval(window.chartInterval);
+                delete window.chartInterval;
+            }
+        }
+
+        function updateResults(results) {
+            const container = document.getElementById('results');
+            container.innerHTML = results.map(result => `
+                <div class="result-item ${result.isAnomaly ? 'anomaly' : ''}">
+                    <div class="result-header">
+                        <div class="timestamp">${new Date(result.timestamp).toLocaleTimeString()}</div>
+                        <div class="main-info">${result.isAnomaly ? '🚨 ОБНАРУЖЕНА АНОМАЛИЯ' : '✅ Нормальный трафик'}</div>
+                        <button class="toggle-btn" onclick="toggleDetails(this)">▼</button>
+                    </div>
+                    <div class="info-container">
+                        <div class="basic-info">
+                            Протокол: ${protocolMap[result.features.feature2] || 'Неизвестно'} (целое число)<br>
+                            Байт источника: ${result.features.feature5.toFixed(0)} (целое число)
+                        </div>
+                    </div>
+                    <div class="hidden-details" style="display: none;">
+                        <div>
+                            Длительность (float): ${result.features.feature1.toFixed(2)}<br>
+                            Тип сервиса (int): ${result.features.feature3}<br>
+                            Флаг (int): ${result.features.feature4}<br>
+                            Байты получателя (float): ${result.features.feature6.toFixed(0)}<br>
+                            Land (int): ${result.features.feature7}<br>
+                            Wrong Fragment (int): ${result.features.feature8}<br>
+                            Urgent (int): ${result.features.feature9}<br>
+                            Hot (int): ${result.features.feature10}<br>
+                            Число неудачных входов (int): ${result.features.feature11}<br>
+                            Вошёл (int): ${result.features.feature12}<br>
+                            Число компрометаций (int): ${result.features.feature13}<br>
+                            Root Shell (int): ${result.features.feature14}<br>
+                            Попытка SU (int): ${result.features.feature15}<br>
+                            Число root-действий (int): ${result.features.feature16}<br>
+                            Число созданных файлов (int): ${result.features.feature17}<br>
+                            Число оболочек (int): ${result.features.feature18}<br>
+                            Число обращений к файлам (int): ${result.features.feature19}<br>
+                            Число исходящих команд (int): ${result.features.feature20}<br>
+                            Вход через хост (int): ${result.features.feature21}<br>
+                            Гостевой вход (int): ${result.features.feature22}<br>
+                            Счётчик (int): ${result.features.feature23}<br>
+                            Счётчик сервисов (int): ${result.features.feature24}<br>
+                            Процент ошибок сервера (float): ${result.features.feature25.toFixed(2)}<br>
+                            Процент ошибок сервиса (float): ${result.features.feature26.toFixed(2)}<br>
+                            Процент ошибок запроса (float): ${result.features.feature27.toFixed(2)}<br>
+                            Процент ошибок сервиса запроса (float): ${result.features.feature28.toFixed(2)}<br>
+                            Процент одинаковых сервисов (float): ${result.features.feature29.toFixed(2)}<br>
+                            Процент разных сервисов (float): ${result.features.feature30.toFixed(2)}<br>
+                            Процент разных хостов сервиса (float): ${result.features.feature31.toFixed(2)}<br>
+                            Счётчик хоста назначения (int): ${result.features.feature32}<br>
+                            Счётчик сервисов хоста (int): ${result.features.feature33}<br>
+                            Процент одинаковых сервисов хоста (float): ${result.features.feature34.toFixed(2)}<br>
+                            Процент разных сервисов хоста (float): ${result.features.feature35.toFixed(2)}<br>
+                            Процент одинаковых портов хоста (float): ${result.features.feature36.toFixed(2)}<br>
+                            Процент разных хостов сервиса хоста (float): ${result.features.feature37.toFixed(2)}<br>
+                            Процент ошибок хоста (float): ${result.features.feature38.toFixed(2)}<br>
+                            Процент ошибок сервиса хоста (float): ${result.features.feature39.toFixed(2)}<br>
+                            Процент ошибок запроса хоста (float): ${result.features.feature40.toFixed(2)}<br>
+                            Процент ошибок сервиса запроса хоста (float): ${result.features.feature41.toFixed(2)}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            clearChart();
+        }
+
+        // Инициализация при загрузке страницы
+        window.addEventListener('load', () => {
+            initChart();
+            // Инициализируем обработчики событий
+            const controlButton = document.querySelector('.control-button');
+            const clearButton = document.querySelector('.clear-button');
+            
+            controlButton.addEventListener('click', toggleMonitoring);
+            clearButton.addEventListener('click', clearResults);
+        });
+    </script>
+</body>
+</html>

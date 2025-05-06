@@ -14,7 +14,8 @@
     </div>
         <header>
             <button class="menu-toggle" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
-            <h1 class="logo" style="color: white; margin-left: 20px; font-family: 'Fraunces', serif; font-size: 2.5rem;">Midover</h1>
+            <br>
+            <h1 class="logo">Midover</h1>
             <button class="theme-toggle" onclick="toggleTheme()">
                 <i class="fas fa-sun" id="themeIcon"></i>
             </button>
@@ -128,11 +129,27 @@
                         <input type="file" multiple id="fileInput">
                         <button class="analyze-btn" onclick="analyzeFiles()">Анализировать</button>
                     </div>
+
+                    <div class="dropzone" id="dropzone">
+                        <i class="fas fa-cloud-upload-alt fa-signal"></i>
+                        <p>Анализировать трафик в реальном времени</p>
+                        <button class="analyze-btn" onclick="javascript:location.href='http://localhost:8181';">Анализировать</button>
+                    </div>
                 </div>
     
                 <!-- Результаты анализа -->
                 <div class="analysis-results" id="resultsSection">
                     <div class="result-card">
+                        
+                        <div class="status-section">
+                            <span class="anomaly-badge-label" id="statusBadgeLabel">Статус</span>
+                            <span class="anomaly-badge" id="statusBadge"></span>
+                        </div>
+                        <br>
+                        <br>
+                        <button class="analyze-btn" onclick="exportResults()">Экспорт CSV</button>
+                        <br>
+                        <br>
                         <h2>Результаты анализа</h2>
                         <table class="result-table">
                             <thead>
@@ -145,17 +162,10 @@
                                 <!-- Сюда будут добавляться строки динамически -->
                             </tbody>
                         </table>
-                        <div class="status-section">
-                            <span class="anomaly-badge-label" id="statusBadgeLabel">Статус</span>
-                            <span class="anomaly-badge" id="statusBadge"></span>
-                        </div>
-                        <button class="analyze-btn" onclick="exportResults()">Экспорт CSV</button>
                         <!-- График -->
-                        <!-- В секции с графиками -->
+                        <!-- Комплексный график -->
                         <div class="chart-container">
-                            <canvas id="barChart" width="400" height="200"></canvas>
-                            <canvas id="durationChart" width="400" height="200"></canvas>
-                            <canvas id="rateChart" width="400" height="200"></canvas>
+                            <canvas id="combinedChart" width="800" height="400"></canvas>
                         </div>
                     </div>
                 </div>
@@ -238,194 +248,323 @@
             });
     
             function analyzeFiles() {
-                const fileInput = document.getElementById('fileInput');
-                const resultsSection = document.getElementById('resultsSection');
-                const uploadSection = document.getElementById('uploadSection');
-                const resultTableBody = document.getElementById('resultTableBody');
-                const loading = document.getElementById('loading');
-    
-                // Очищаем таблицу перед новым анализом
-                resultTableBody.innerHTML = '';
-    
-                // Проверяем, что файл выбран
-                if (fileInput.files.length === 0) {
-                    alert("Пожалуйста, выберите файл.");
-                    return;
-                }
-    
-                const file = fileInput.files[0];
-                const reader = new FileReader();
-    
-                reader.onload = function (event) {
-                    try {
-                        // Читаем содержимое файла как строку
-                        const fileContent = event.target.result;
-    
-                        // Преобразуем данные в массив и затем в JSON
-                        const dataArray = fileContent.split(',').map(item => item.trim());
-    
-                        // Создаём объект с ключами feature1, feature2, ..., feature41
-                        const jsonData = {};
-                        for (let i = 0; i < 41; i++) {
-                            jsonData[`feature${i + 1}`] = dataArray[i] || ''; // Если данных меньше 41, заполняем пустыми строками
+            const fileInput = document.getElementById('fileInput');
+            const resultsSection = document.getElementById('resultsSection');
+            const uploadSection = document.getElementById('uploadSection');
+            const resultTableBody = document.getElementById('resultTableBody');
+            
+            // Очищаем таблицу перед новым анализом
+            resultTableBody.innerHTML = '';
+            
+            // Проверяем, что файл выбран
+            if (fileInput.files.length === 0) {
+                alert("Пожалуйста, выберите файл.");
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function (event) {
+                try {
+                    // Читаем содержимое файла как строку
+                    const fileContent = event.target.result;
+                    // Преобразуем данные в массив и затем в JSON
+                    const dataArray = fileContent.split(',').map(item => item.trim());
+                    
+                    // Создаём объект с ключами feature1, feature2, ..., feature41
+                    const jsonData = {};
+                    for (let i = 0; i < 41; i++) {
+                        jsonData[`feature${i + 1}`] = dataArray[i] || '';
+                    }
+                    
+                    // Отправляем JSON на сервер
+                    fetch('http://127.0.0.1:5000/predict', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(jsonData)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Ошибка HTTP: ${response.status}`);
                         }
-    
-                        // Отправляем JSON на сервер
-                        fetch('http://127.0.0.1:5000/predict', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(jsonData)
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(`Ошибка HTTP: ${response.status}`);
+                        return response.json();
+                    })
+                    .then(data => {
+                        const prediction = data.prediction;
+                        
+                        // Обновляем статус
+                        const statusBadge = document.getElementById('statusBadge');
+                        statusBadge.className = `anomaly-badge ${prediction === 0 ? 'status-normal' : 'status-anomaly'}`;
+                        statusBadge.textContent = `${prediction === 0 ? 'Normal' : 'Anomaly'}`;
+                        
+                        // Сопоставление featureN и названий параметров
+                        const featureNames = {
+                            feature1: "Длительность соединения",
+                            feature2: "Тип протокола",
+                            feature3: "Сервис",
+                            feature4: "Флаг TCP",
+                            feature5: "Байт от источника",
+                            feature6: "Байт к получателю",
+                            feature7: "Ср. размер пакета",
+                            feature8: "Ошибка SYN",
+                            feature9: "Ошибка REJ",
+                            feature10: "Тип сервиса",
+                            feature11: "Ошибка DIFF_SRV",
+                            feature12: "Ошибка DIFF_SRV_RATE",
+                            feature13: "Ошибки",
+                            feature14: "Ошибка SAME_SRV",
+                            feature15: "Ошибка DIFF_SRV",
+                            feature16: "Ошибка DST_HOST_SAME_SRV",
+                            feature17: "Ошибка DST_HOST_DIFF_SRV",
+                            feature18: "Ошибка DST_HOST_SAME_SRC_PORT",
+                            feature19: "Ошибка DST_HOST_SAME_DST_PORT",
+                            feature20: "Ошибка DST_HOST_SERROR_RATE",
+                            feature21: "Ошибка DST_HOST_RERROR_RATE",
+                            feature22: "Ошибка DST_HOST_SAME_SRV_RATE",
+                            feature23: "Число соединений",
+                            feature24: "Число ошибок",
+                            feature25: "Частота ошибок SYN",
+                            feature26: "Частота ошибок REJ",
+                            feature27: "Частота ошибок DIFF_SRV",
+                            feature28: "Частота ошибок SRC_TO_DST",
+                            feature29: "Частота ошибок DST_TO_SRC",
+                            feature30: "Сервисы одинаковые",
+                            feature31: "Сервисы разные",
+                            feature32: "Число соединений к хосту",
+                            feature33: "Число ошибок к хосту",
+                            feature34: "Сервисы на хосте одинаковые",
+                            feature35: "Сервисы на хосте разные",
+                            feature36: "Частота ошибок к хосту",
+                            feature37: "Частота ошибок SYN к хосту",
+                            feature38: "Частота ошибок REJ к хосту",
+                            feature39: "Частота ошибок DIFF_SRV к хосту",
+                            feature40: "Частота ошибок SRC_TO_DST к хосту",
+                            feature41: "Частота ошибок DST_TO_SRC к хосту"
+                        };
+                        
+                        // Ключевые параметры для выделения
+                        const keyFeatures = [
+                            "feature1", "feature2", "feature3", "feature4", "feature5", "feature6",
+                            "feature23", "feature25", "feature27", "feature29", "feature30",
+                            "feature32", "feature34"
+                        ];
+                        
+                        // Добавляем все 41 параметра в таблицу
+                        for (let i = 1; i <= 41; i++) {
+                            const featureKey = `feature${i}`;
+                            const paramName = featureNames[featureKey] || featureKey;
+                            const value = jsonData[featureKey] !== '' ? parseFloat(jsonData[featureKey]).toFixed(2) : 'N/A';
+                            
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${paramName}</td>
+                                <td>${value}</td>
+                            `;
+                            
+                            // Выделяем ключевые параметры
+                            if (keyFeatures.includes(featureKey)) {
+                                row.classList.add('highlight');
                             }
-                            return response.json();
-                        })
-                        .then(data => {
-        const prediction = data.prediction;
-        
-        // Обновляем статус
-        const statusBadge = document.getElementById('statusBadge');
-        statusBadge.className = `anomaly-badge ${prediction === 0 ? 'status-normal' : 'status-anomaly'}`;
-        statusBadge.textContent = `${prediction === 0 ? 'Normal' : 'Anomaly'}`;
-        
-        // Создаем массив ключевых параметров с единицами измерения
-        const keyParams = [
-            { name: 'Продолжительность соединения', value: parseFloat(jsonData.feature3).toFixed(2), unit: 'сек' },
-            { name: 'Количество соединений', value: parseInt(jsonData.feature4), unit: 'шт' },
-            { name: 'Объем данных от источника', value: parseInt(jsonData.feature5), unit: 'байт' },
-            { name: 'Объем данных к получателю', value: parseInt(jsonData.feature6), unit: 'байт' },
-            { name: 'Частота ошибок SYN', value: (parseFloat(jsonData.feature25) * 100).toFixed(2), unit: '%' },
-            { name: 'Частота ошибок REJ', value: (parseFloat(jsonData.feature27) * 100).toFixed(2), unit: '%' }
-        ];
-        
-        // Добавляем строки с параметрами
-        keyParams.forEach(param => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${param.name}</td>
-                <td>${param.value} ${param.unit}</td>
-            `;
-            resultTableBody.appendChild(row);
-        });
-        
-        // Строим графики
-        drawBarChart(jsonData);
-        
-        // Показываем результаты
-        uploadSection.style.display = 'none';
-        resultsSection.style.display = 'block';
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    })
-                        .catch(error => {
-                            console.error('Ошибка:', error);
-                            alert(`Ошибка: ${error.message}`);
+                            
+                            resultTableBody.appendChild(row);
+                        }
+                        
+                        // Строим графики
+                        drawBarChart(jsonData);
+                        
+                        // Показываем результаты
+                        uploadSection.style.display = 'none';
+                        resultsSection.style.display = 'block';
+                        // Прокрутка до секции с результатами
+                        resultsSection.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start' // 'start' - начало секции вверху, 'center' - по центру
                         });
-                    } catch (error) {
-                        console.error('Ошибка при обработке файла:', error);
-                        alert(`Ошибка при обработке файла: ${error.message}`);
-                    }
-                };
-    
-                // Начинаем чтение файла
-                reader.readAsText(file);
-    
-                // Показываем индикатор загрузки
-                loading.style.display = 'block';
-            }
-    
-            function drawBarChart(data) {
-            // Получаем значения 5-го и 6-го параметров
-            const srcBytes = parseFloat(data.feature5) || 0;
-            const dstBytes = parseFloat(data.feature6) || 0;
-    
-            // Удаляем старый график, если он существует
-            if (window.barChart && typeof window.barChart.destroy === 'function') {
-                window.barChart.destroy();
-            }
-    
-            // Создаём новый график
-            const ctx = document.getElementById('barChart').getContext('2d');
-            window.barChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['От источника', 'К получателю'],
-                    datasets: [{
-                        label: 'Значение',
-                        data: [srcBytes, dstBytes],
-                        backgroundColor: ['#FF6384', '#36A2EB']
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    },
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Объём данных от источника и объём данных к получателю'
-                        }
-                    }
+                        //window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                    })
+                    .catch(error => {
+                        console.error('Ошибка:', error);
+                        alert(`Ошибка: ${error.message}`);
+                    });
+                } catch (error) {
+                    console.error('Ошибка при обработке файла:', error);
+                    alert(`Ошибка при обработке файла: ${error.message}`);
                 }
-            });
+            };
+            
+            // Начинаем чтение файла
+            reader.readAsText(file);
+        }
     
-            // Второй график: Duration и Count
-            const duration = parseFloat(data.feature3) || 0;
-            const count = parseFloat(data.feature4) || 0;
-            
-            // Удаляем старый график, если он существует
-            if (window.durationChart && typeof window.durationChart.destroy === 'function') {
-                window.durationChart.destroy();
-            }
-            
-            const ctx2 = document.getElementById('durationChart').getContext('2d');
-            window.durationChart = new Chart(ctx2, {
-                type: 'bar',
-                data: {
-                    labels: ['Продолжительность соединения', 'Кол-во соединений'],
-                    datasets: [{
-                        label: 'Значение',
-                        data: [duration, count],
-                        backgroundColor: ['#FFCE56', '#4BC0C0']
-                    }]
-                },
-                options: {
-                    scales: { y: { beginAtZero: true } },
-                    plugins: { title: { display: true, text: 'Продолжительность соединения и Кол-во соединений к хосту за 2 сек.' } }
-                }
-            });
-    
-            // Третий график: serror_rate и rerror_rate
-            const serror = parseFloat(data.feature25) || 0;
-            const rerror = parseFloat(data.feature27) || 0;
-            
-            // Удаляем старый график, если он существует
-            if (window.rateChart && typeof window.rateChart.destroy === 'function') {
-                window.rateChart.destroy();
-            }
-            
-            const ctx3 = document.getElementById('rateChart').getContext('2d');
-            window.durationChart = new Chart(ctx3, {
-                type: 'bar',
-                data: {
-                    labels: ['SYN', 'REJ'],
-                    datasets: [{
-                        label: 'Значение',
-                        data: [serror, rerror],
-                        backgroundColor: ['#FA7233', '#F12E2E']
-                    }]
-                },
-                options: {
-                    scales: { y: { beginAtZero: true } },
-                    plugins: { title: { display: true, text: 'Частота ошибки SYN vs Частота ошибки REJ' } }
-                }
-            });
+        function drawBarChart(data) {
+    // Удаление старых графиков
+    if (window.combinedChart instanceof Chart) {
+        window.combinedChart.destroy();
     }
+
+    // === Парсим данные ===
+    const srcBytes = parseFloat(data.feature5) || 0;
+    const dstBytes = parseFloat(data.feature6) || 0;
+    const duration = parseFloat(data.feature1) || 0;
+    const count = parseFloat(data.feature23) || 0;
+    const serror = parseFloat(data.feature25) || 0;
+    const rerror = parseFloat(data.feature27) || 0;
+    const protocolType = parseFloat(data.feature2) || 0;
+    const serviceType = parseFloat(data.feature3) || 0;
+    const hostConnections = parseFloat(data.feature32) || 0;
+    const sameHostService = parseFloat(data.feature34) || 0;
+    const dstToSrcRate = parseFloat(data.feature29) || 0;
+
+    // === Конфигурация графика ===
+    const ctx = document.getElementById('combinedChart').getContext('2d');
+    window.combinedChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Трафик', 'Соединения', 'Ошибки', 'Протоколы/Сервисы'],
+            datasets: [
+                // === Трафик ===
+                {
+                    label: 'От источника (байт)',
+                    data: [srcBytes, null, null, null],
+                    backgroundColor: '#FF6384',
+                    yAxisID: 'y',
+                    stack: 'stack1'
+                },
+                {
+                    label: 'К получателю (байт)',
+                    data: [dstBytes, null, null, null],
+                    backgroundColor: '#36A2EB',
+                    yAxisID: 'y',
+                    stack: 'stack1'
+                },
+
+                // === Соединения ===
+                {
+                    label: 'Длительность (сек)',
+                    data: [null, duration, null, null],
+                    backgroundColor: '#FFCE56',
+                    yAxisID: 'y',
+                    stack: 'stack2'
+                },
+                {
+                    label: 'Число соединений',
+                    data: [null, count, null, null],
+                    backgroundColor: '#4BC0C0',
+                    yAxisID: 'y',
+                    stack: 'stack2'
+                },
+                {
+                    label: 'Соединений к хосту',
+                    data: [null, hostConnections, null, null],
+                    backgroundColor: '#9AD0F5',
+                    yAxisID: 'y',
+                    stack: 'stack2'
+                },
+
+                // === Ошибки ===
+                {
+                    label: 'SYN ошибки',
+                    data: [null, null, serror, null],
+                    backgroundColor: '#FA7233',
+                    yAxisID: 'y',
+                    stack: 'stack3'
+                },
+                {
+                    label: 'REJ ошибки',
+                    data: [null, null, rerror, null],
+                    backgroundColor: '#F12E2E',
+                    yAxisID: 'y',
+                    stack: 'stack3'
+                },
+                {
+                    label: 'DST_TO_SRC ошибки',
+                    data: [null, null, dstToSrcRate, null],
+                    backgroundColor: '#E64A19',
+                    yAxisID: 'y',
+                    stack: 'stack3'
+                },
+
+                // === Протоколы и сервисы (категориальные данные) ===
+                {
+                    label: 'Тип протокола',
+                    data: [null, null, null, protocolType],
+                    backgroundColor: '#AB47BC',
+                    yAxisID: 'y1',
+                    type: 'line',
+                    borderColor: '#AB47BC',
+                    borderWidth: 2,
+                    fill: false
+                },
+                {
+                    label: 'Тип сервиса',
+                    data: [null, null, null, serviceType],
+                    backgroundColor: '#42A5F5',
+                    yAxisID: 'y1',
+                    type: 'line',
+                    borderColor: '#42A5F5',
+                    borderWidth: 2,
+                    fill: false
+                },
+                {
+                    label: 'Сервисы на хосте',
+                    data: [null, null, null, sameHostService],
+                    backgroundColor: '#66BB6A',
+                    yAxisID: 'y1',
+                    type: 'line',
+                    borderColor: '#66BB6A',
+                    borderWidth: 2,
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Числовые значения'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Категориальные данные (нормализованные)'
+                    },
+                    grid: {
+                        drawOnChartArea: false
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Комплексный анализ сетевого трафика'
+                },
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            }
+        }
+    });
+        }
     
             function exportResults() {
                 const table = document.querySelector('.result-table');
