@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Отчёты пользователей</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto :wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Font Awesome для иконок -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css " rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f0f2f5;
+            color: #333;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            padding: 0 20px;
+        }
+
+        .logo_button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            width: 50px;
+            height: 50px;
+            transition: transform 0.3s;
+        }
+
+        .logo_button img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 12px;
+            border: 2px solid #fff;
+            transition: border-color 0.3s ease;
+        }
+
+        .logo_button:hover img {
+            border-color: #0ec138;
+        }
+
+        .logo_button:hover {
+            transform: scale(1.1);
+        }
+
+        main {
+            padding: 90px 20px 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1a73e8;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .report {
+            background: white;
+            border-left: 6px solid #2196F3;
+            border-radius: 8px;
+            margin: 20px 0;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .anomaly {
+            border-left-color: #f44336;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .timestamp {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .main-info {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-dot.normal {
+            background-color: #4caf50;
+        }
+
+        .status-dot.anomaly {
+            background-color: #f44336;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #f1f3f4;
+        }
+
+        .btn-icon {
+            color: #555;
+            font-size: 1.1em;
+        }
+
+        .btn-delete:hover .btn-icon {
+            color: #d32f2f;
+        }
+
+        .details {
+            display: none;
+            margin-top: 12px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .field {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 0.9em;
+        }
+
+        .field:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            font-weight: 500;
+            color: #666;
+            width: 45%;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .value {
+            color: #333;
+            font-weight: 400;
+            width: 55%;
+            text-align: right;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        @media (max-width: 600px) {
+            .field {
+                flex-direction: column;
+                align-items: flex-start;
+                border-bottom: none;
+            }
+            
+            .label {
+                width: 100%;
+                font-weight: 500;
+                margin-bottom: 4px;
+            }
+            
+            .value {
+                width: 100%;
+                font-weight: 400;
+                margin-bottom: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="logo_button" id="btn_logo">
+            <img src="/static/img/logo.png" alt="Логотип">
+        </button>
+        <script src="/static/js/goto_main.js"></script>
+    </header>
+
+    <main>
+        <h1>Отчёты пользователя</h1>
+        
+        {{ if . }}
+            {{ range . }}
+                <div class="report {{ if .IsAnomaly }}anomaly{{ end }}" data-id="{{ .ID }}">
+                    <div class="report-header">
+                        <div>
+                            <div class="timestamp">{{ .Timestamp.Format "2006-01-02 15:04:05" }}</div>
+                            <div class="main-info">
+                                <span class="status-dot {{ if .IsAnomaly }}anomaly{{ else }}normal{{ end }}"></span>
+                                <span>{{ if .IsAnomaly }}Аномалия{{ else }}Нормальный трафик{{ end }}</span>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-toggle" title="Показать детали">
+                                <i class="btn-icon fas fa-chevron-down toggle-icon"></i>
+                            </button>
+                            <button class="btn btn-delete" title="Удалить" data-id="{{ .ID }}">
+                                <i class="btn-icon fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="details">
+                        <div class="field"><span class="label">Длительность:</span><span class="value">{{ .Duration }}</span></div>
+                        <div class="field"><span class="label">Тип протокола:</span><span class="value">{{ .ProtocolType }}</span></div>
+                        <div class="field"><span class="label">Сервис:</span><span class="value">{{ .Service }}</span></div>
+                        <div class="field"><span class="label">Флаг:</span><span class="value">{{ .Flag }}</span></div>
+                        <div class="field"><span class="label">Байт источника:</span><span class="value">{{ .SrcBytes }}</span></div>
+                        <div class="field"><span class="label">Байт получателя:</span><span class="value">{{ .DstBytes }}</span></div>
+                        <div class="field"><span class="label">Land:</span><span class="value">{{ .Land }}</span></div>
+                        <div class="field"><span class="label">Wrong Fragment:</span><span class="value">{{ .WrongFragment }}</span></div>
+                        <div class="field"><span class="label">Urgent:</span><span class="value">{{ .Urgent }}</span></div>
+                        <div class="field"><span class="label">Hot:</span><span class="value">{{ .Hot }}</span></div>
+                        <div class="field"><span class="label">Неудачные входы:</span><span class="value">{{ .NumFailedLogins }}</span></div>
+                        <div class="field"><span class="label">Вошёл:</span><span class="value">{{ if .LoggedIn }}Да{{ else }}Нет{{ end }}</span></div>
+                        <div class="field"><span class="label">Компрометации:</span><span class="value">{{ .NumCompromised }}</span></div>
+                        <div class="field"><span class="label">Root Shell:</span><span class="value">{{ if .RootShell }}Да{{ else }}Нет{{ end }}</span></div>
+                        <div class="field"><span class="label">Попытка SU:</span><span class="value">{{ if .SuAttempted }}Да{{ else }}Нет{{ end }}</span></div>
+                        <div class="field"><span class="label">Число root:</span><span class="value">{{ .NumRoot }}</span></div>
+                        <div class="field"><span class="label">Созданные файлы:</span><span class="value">{{ .NumFileCreations }}</span></div>
+                        <div class="field"><span class="label">Число оболочек:</span><span class="value">{{ .NumShells }}</span></div>
+                        <div class="field"><span class="label">Файлы доступа:</span><span class="value">{{ .NumAccessFiles }}</span></div>
+                        <div class="field"><span class="label">Исходящие команды:</span><span class="value">{{ .NumOutboundCmds }}</span></div>
+                        <div class="field"><span class="label">Вход через хост:</span><span class="value">{{ if .IsHostLogin }}Да{{ else }}Нет{{ end }}</span></div>
+                        <div class="field"><span class="label">Гостевой вход:</span><span class="value">{{ if .IsGuestLogin }}Да{{ else }}Нет{{ end }}</span></div>
+                        <div class="field"><span class="label">Счётчик:</span><span class="value">{{ .Count }}</span></div>
+                        <div class="field"><span class="label">Счётчик сервисов:</span><span class="value">{{ .SrvCount }}</span></div>
+                        <div class="field"><span class="label">Ошибка сервера (%):</span><span class="value">{{ printf "%.2f" .SerrorRate }}</span></div>
+                        <div class="field"><span class="label">Ошибка сервиса (%):</span><span class="value">{{ printf "%.2f" .SrvSerrorRate }}</span></div>
+                        <div class="field"><span class="label">Ошибка запроса (%):</span><span class="value">{{ printf "%.2f" .RerrorRate }}</span></div>
+                        <div class="field"><span class="label">Ошибка сервиса запроса (%):</span><span class="value">{{ printf "%.2f" .SrvRerrorRate }}</span></div>
+                        <div class="field"><span class="label">Одинаковые сервисы (%):</span><span class="value">{{ printf "%.2f" .SameSrvRate }}</span></div>
+                        <div class="field"><span class="label">Разные сервисы (%):</span><span class="value">{{ printf "%.2f" .DiffSrvRate }}</span></div>
+                        <div class="field"><span class="label">Разные хосты сервиса (%):</span><span class="value">{{ printf "%.2f" .SrvDiffHostRate }}</span></div>
+                        <div class="field"><span class="label">Счётчик хоста назначения:</span><span class="value">{{ .DstHostCount }}</span></div>
+                        <div class="field"><span class="label">Счётчик сервисов хоста:</span><span class="value">{{ .DstHostSrvCount }}</span></div>
+                        <div class="field"><span class="label">Одинаковые сервисы хоста (%):</span><span class="value">{{ printf "%.2f" .DstHostSameSrvRate }}</span></div>
+                        <div class="field"><span class="label">Разные сервисы хоста (%):</span><span class="value">{{ printf "%.2f" .DstHostDiffSrvRate }}</span></div>
+                        <div class="field"><span class="label">Одинаковые порты хоста (%):</span><span class="value">{{ printf "%.2f" .DstHostSameSrcPortRate }}</span></div>
+                        <div class="field"><span class="label">Разные хосты сервиса хоста (%):</span><span class="value">{{ printf "%.2f" .DstHostSrvDiffHostRate }}</span></div>
+                        <div class="field"><span class="label">Ошибка хоста (%):</span><span class="value">{{ printf "%.2f" .DstHostSerrorRate }}</span></div>
+                        <div class="field"><span class="label">Ошибка сервиса хоста (%):</span><span class="value">{{ printf "%.2f" .DstHostSrvSerrorRate }}</span></div>
+                        <div class="field"><span class="label">Ошибка запроса хоста (%):</span><span class="value">{{ printf "%.2f" .DstHostRerrorRate }}</span></div>
+                        <div class="field"><span class="label">Ошибка сервиса запроса хоста (%):</span><span class="value">{{ printf "%.2f" .DstHostSrvRerrorRate }}</span></div>
+                        <div class="field"><span class="label">Создано:</span><span class="value">{{ .CreatedAt.Format "2006-01-02 15:04:05" }}</span></div>
+                    </div>
+                </div>
+            {{ end }}
+        {{ else }}
+            <p style="text-align: center; margin-top: 40px;">Сохранённых отчётов не найдено.</p>
+        {{ end }}
+    </main>
+
+    <script>
+        // Функция для переключения деталей отчета
+        function toggleReportDetails(button) {
+            const report = button.closest('.report');
+            const details = report.querySelector('.details');
+            const icon = button.querySelector('.toggle-icon');
+            const isVisible = details.style.display === 'block';
+            
+            details.style.display = isVisible ? 'none' : 'block';
+            icon.classList.remove(isVisible ? 'fa-chevron-up' : 'fa-chevron-down');
+            icon.classList.add(isVisible ? 'fa-chevron-down' : 'fa-chevron-up');
+        }
+
+        async function deleteReport(button) {
+            const id = button.getAttribute('data-id');
+            if (!confirm('Вы действительно хотите удалить этот отчет?')) return;
+
+            try {
+                const response = await fetch(`/api/reports/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    button.closest('.report').remove();
+                } else {
+                    alert('Ошибка при удалении отчета');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Произошла ошибка при удалении');
+            }
+        }
+
+        // Инициализация обработчиков событий
+        document.addEventListener('DOMContentLoaded', () => {
+            // Обработчики для кнопок деталей
+            document.querySelectorAll('.btn-toggle').forEach(button => {
+                button.addEventListener('click', () => toggleReportDetails(button));
+            });
+            
+            // Обработчики для кнопок удаления
+            document.querySelectorAll('.btn-delete').forEach(button => {
+                button.addEventListener('click', () => deleteReport(button));
+            });
+        });
+    </script>
+</body>
+</html>

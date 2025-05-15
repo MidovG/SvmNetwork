@@ -143,6 +143,20 @@
             color: #4a5568;
             margin-left: auto;
         }
+        .save-btn {
+            background: #48bb78;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            margin-left: 1rem;
+            font-size: 0.875rem;
+            transition: background 0.2s ease;
+        }
+        .save-btn:hover {
+            background: #38a169;
+        }
         .hidden-details {
             margin-top: 1rem;
             padding: 1rem 1.5rem;
@@ -256,7 +270,7 @@
                 stopChartPolling();
             }
         }
-
+        
         function updateStatus() {
             const statusDiv = document.querySelector('.status');
             const statusText = document.querySelector('.status-text');
@@ -420,13 +434,14 @@
                     <div class="result-header">
                         <div class="timestamp">${new Date(result.timestamp).toLocaleTimeString()}</div>
                         <div class="main-info">${result.isAnomaly ? '🚨 ОБНАРУЖЕНА АНОМАЛИЯ' : '✅ Нормальный трафик'}</div>
-                        <button class="toggle-btn" onclick="toggleDetails(this)">▼</button>
+                        <button class="save-btn" onclick="saveItem(this)" data-result='${encodeURIComponent(JSON.stringify(result))}'>💾 Сохранить</button>
                     </div>
                     <div class="info-container">
                         <div class="basic-info">
                             Протокол: ${protocolMap[result.features.feature2] || 'Неизвестно'} (целое число)<br>
                             Байт источника: ${result.features.feature5.toFixed(0)} (целое число)
                         </div>
+                        <button class="toggle-btn" onclick="toggleDetails(this)">▼</button>
                     </div>
                     <div class="hidden-details" style="display: none;">
                         <div>
@@ -473,6 +488,33 @@
                     </div>
                 </div>
             `).join('');
+        }
+
+        function saveItem(button) {
+            // Получаем закодированные данные из атрибута кнопки
+            const encodedData = button.getAttribute('data-result');
+            // Декодируем и парсим JSON
+            const data = JSON.parse(decodeURIComponent(encodedData));
+            
+            // Отправляем POST-запрос на сервер
+            fetch('/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('✅ Данные успешно сохранены');
+                } else {
+                    alert('⚠️ Сервер вернул ошибку');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка сохранения:', error);
+                alert('❌ Не удалось отправить данные на сервер');
+            });
         }
 
         function clearResults() {

@@ -26,6 +26,8 @@ func main() {
 	r.HandleFunc("/user_password", PasswordPage).Methods("POST", "GET")
 	r.HandleFunc("/update_password", UpdatePassword).Methods("POST", "GET")
 	r.HandleFunc("/exit", ExitFromLk).Methods("POST", "GET")
+	r.HandleFunc("/reports", Reports).Methods("POST", "GET")
+	r.HandleFunc("/api/reports/{id}", DeleteReport).Methods("DELETE")
 
 	// info pages
 	r.HandleFunc("/about_us", AboutUsPage).Methods("POST", "GET")

@@ -4,7 +4,7 @@
 
 body {
   font-family: 'Arial', sans-serif;
-  background: #000000; /* Основной фон остается черным */
+  background: #e5f5f5; 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -232,6 +232,6 @@ footer {
 }
 
 .prod_by, .my_rights, .my_mail {
-  color: #fff;
+  color: #000000;
   font-size: 11px;
 }

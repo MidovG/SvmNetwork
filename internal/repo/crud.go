@@ -3,6 +3,7 @@ package repo
 import (
 	"fmt"
 	"log"
+	"svm/internal/entity/dataSetFields"
 	"svm/internal/entity/userModel"
 	"time"
 
@@ -168,4 +169,83 @@ func (d *Database) LoadPersonalInfo(userId int) userModel.UserProfile {
 	}
 
 	return userProfile
+}
+
+func (d *Database) LoadReports(userId int) []dataSetFields.Record {
+	// Выборка данных
+	rows, err := d.db.Query("SELECT id, timestamp, is_anomaly, duration, protocol_type, service, flag, src_bytes, dst_bytes, land, wrong_fragment, urgent, hot, num_failed_logins, logged_in, num_compromised, root_shell, su_attempted, num_root, num_file_creations, num_shells, num_access_files, num_outbound_cmds, is_host_login, is_guest_login, count, srv_count, serror_rate, srv_serror_rate, rerror_rate, srv_rerror_rate, same_srv_rate, diff_srv_rate, srv_diff_host_rate, dst_host_count, dst_host_srv_count, dst_host_same_srv_rate, dst_host_diff_srv_rate, dst_host_same_src_port_rate, dst_host_srv_diff_host_rate, dst_host_serror_rate, dst_host_srv_serror_rate, dst_host_rerror_rate, dst_host_srv_rerror_rate, user_id, created_at FROM network_analysis_reports where user_id = ?", userId)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	// Массив для хранения записей
+	var records []dataSetFields.Record
+
+	// Обработка строк
+	for rows.Next() {
+		var r dataSetFields.Record
+		err := rows.Scan(
+			&r.ID, &r.TimestampStr, &r.IsAnomaly, &r.Duration, &r.ProtocolType, &r.Service, &r.Flag,
+			&r.SrcBytes, &r.DstBytes, &r.Land, &r.WrongFragment, &r.Urgent, &r.Hot, &r.NumFailedLogins,
+			&r.LoggedIn, &r.NumCompromised, &r.RootShell, &r.SuAttempted, &r.NumRoot, &r.NumFileCreations,
+			&r.NumShells, &r.NumAccessFiles, &r.NumOutboundCmds, &r.IsHostLogin, &r.IsGuestLogin,
+			&r.Count, &r.SrvCount, &r.SerrorRate, &r.SrvSerrorRate, &r.RerrorRate, &r.SrvRerrorRate,
+			&r.SameSrvRate, &r.DiffSrvRate, &r.SrvDiffHostRate, &r.DstHostCount, &r.DstHostSrvCount,
+			&r.DstHostSameSrvRate, &r.DstHostDiffSrvRate, &r.DstHostSameSrcPortRate, &r.DstHostSrvDiffHostRate,
+			&r.DstHostSerrorRate, &r.DstHostSrvSerrorRate, &r.DstHostRerrorRate, &r.DstHostSrvRerrorRate,
+			&r.UserID, &r.CreatedAtStr,
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		r.Timestamp, err = time.Parse("2006-01-02 15:04:05", r.TimestampStr)
+		if err != nil {
+			log.Fatal("Ошибка парсинга даты:", err)
+		}
+
+		r.CreatedAt, err = time.Parse("2006-01-02 15:04:05", r.CreatedAtStr)
+		if err != nil {
+			log.Fatal("Ошибка парсинга даты:", err)
+		}
+
+		records = append(records, r)
+	}
+
+	// Проверка ошибок после итерации
+	if err = rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	return records
+}
+
+// ReportExistsForUser проверяет, существует ли отчёт у пользователя
+func (d *Database) ReportExistsForUser(reportID, userID int) (bool, error) {
+	var exists bool
+	err := d.db.QueryRow("SELECT EXISTS(SELECT 1 FROM network_analysis_reports WHERE id = ? AND user_id = ?)", reportID, userID).Scan(&exists)
+	if err != nil {
+		return false, fmt.Errorf("ошибка проверки существования отчёта: %w", err)
+	}
+	return exists, nil
+}
+
+// DeleteReport удаляет отчёт по ID
+func (d *Database) DeleteReportById(reportID int) error {
+	result, err := d.db.Exec("DELETE FROM network_analysis_reports WHERE id = ?", reportID)
+	if err != nil {
+		return fmt.Errorf("ошибка удаления отчёта: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("ошибка получения количества удалённых строк: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("отчёт не найден")
+	}
+
+	log.Printf("Удалено отчётов: %d", rowsAffected)
+	return nil
 }

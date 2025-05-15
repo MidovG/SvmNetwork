@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 	"svm/internal/entity/userModel"
 	"time"
 
@@ -39,6 +41,75 @@ func AboutUsPage(w http.ResponseWriter, r *http.Request) {
 
 func SignPage(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, "lk.html", nil)
+}
+
+func Reports(w http.ResponseWriter, r *http.Request) {
+	if userModel.IsValidToken(r) {
+		userId := userModel.GetIdFromJWT(r)
+
+		if userId == 0 {
+			http.Redirect(w, r, "/personal_lk", http.StatusSeeOther)
+			return
+		}
+
+		reports := gDatabase.LoadReports(userId)
+
+		RenderTemplate(w, "personal_reports.html", reports)
+	} else {
+		http.Redirect(w, r, "/sign_page", http.StatusSeeOther)
+	}
+
+}
+
+// DeleteReportHandler обрабатывает DELETE-запросы для удаления отчёта
+func DeleteReport(w http.ResponseWriter, r *http.Request) {
+	// Проверяем авторизацию
+	if !userModel.IsValidToken(r) {
+		http.Error(w, `{"error": "Unauthorized"}`, http.StatusUnauthorized)
+		return
+	}
+
+	userId := userModel.GetIdFromJWT(r)
+	if userId == 0 {
+		http.Error(w, `{"error": "Invalid user"}`, http.StatusForbidden)
+		return
+	}
+
+	// Извлекаем ID отчёта из URL
+	vars := mux.Vars(r)
+	reportIDStr := vars["id"]
+
+	reportID, err := strconv.Atoi(reportIDStr)
+	if err != nil {
+		http.Error(w, `{"error": "Invalid report ID"}`, http.StatusBadRequest)
+		return
+	}
+
+	// Проверяем, что отчёт существует и принадлежит пользователю
+	exists, err := gDatabase.ReportExistsForUser(reportID, userId)
+	if err != nil {
+		log.Println("Ошибка проверки существования отчёта:", err)
+		http.Error(w, `{"error": "Internal server error"}`, http.StatusInternalServerError)
+		return
+	}
+
+	if !exists {
+		http.Error(w, `{"error": "Report not found or access denied"}`, http.StatusNotFound)
+		return
+	}
+
+	// Удаляем отчёт
+	err = gDatabase.DeleteReportById(reportID)
+	if err != nil {
+		log.Println("Ошибка удаления отчёта:", err)
+		http.Error(w, `{"error": "Failed to delete report"}`, http.StatusInternalServerError)
+		return
+	}
+
+	// Возвращаем успешный ответ
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]bool{"success": true})
 }
 
 func Personal_Lk(w http.ResponseWriter, r *http.Request) {
